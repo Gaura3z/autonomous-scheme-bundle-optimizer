@@ -1,0 +1,58 @@
+[
+  {
+    "id": "pm-kisan-01",
+    "name": "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)",
+    "ministry": "Ministry of Agriculture & Farmers Welfare",
+    "level": "Central Sector",
+    "category": "Agriculture",
+    "financialBenefit": 6000,
+    "benefitType": "Direct Benefit Transfer (DBT)",
+    "frequency": "Quarterly (₹2,000 x 3)",
+    "eligibility": {
+      "minAge": 18,
+      "maxAge": 100,
+      "target": "Small and Marginal Farmers",
+      "maxIncome": 800000,
+      "maxLandAcres": 5.0
+    },
+    "conflictsWith": ["institutional-landholder-01"],
+    "requiredDocuments": ["Aadhaar Card", "Land Holding Record (7/12 or RoR)", "Active Bank Account with NPCI mapping"],
+    "officialUrl": "https://pmkisan.gov.in"
+  },
+  {
+    "id": "pm-surya-ghar-02",
+    "name": "PM Surya Ghar: Muft Bijli Yojana",
+    "ministry": "Ministry of New and Renewable Energy",
+    "level": "Central Sector",
+    "category": "Housing & Clean Energy",
+    "financialBenefit": 78000,
+    "benefitType": "Capital Subsidy + 300 free units/month",
+    "frequency": "One-time installation subsidy",
+    "eligibility": {
+      "minAge": 18,
+      "target": "Residential households with roof rights",
+      "maxIncome": 2500000
+    },
+    "conflictsWith": [],
+    "requiredDocuments": ["Electricity Consumer Bill", "Aadhaar Card", "Proof of Roof Ownership / Electricity Connection"],
+    "officialUrl": "https://pmsuryaghar.gov.in"
+  },
+  {
+    "id": "ayushman-pmjay-03",
+    "name": "Ayushman Bharat PM-JAY",
+    "ministry": "National Health Authority (MoHFW)",
+    "level": "Centrally Sponsored",
+    "category": "Healthcare",
+    "financialBenefit": 500000,
+    "benefitType": "Cashless Secondary & Tertiary Hospitalization",
+    "frequency": "Annual per family floater",
+    "eligibility": {
+      "minAge": 0,
+      "target": "Deprived rural and identified occupational urban families (SECC)",
+      "maxIncome": 250000
+    },
+    "conflictsWith": ["cghs-formal-01", "echs-formal-02"],
+    "requiredDocuments": ["Ration Card", "Aadhaar Card"],
+    "officialUrl": "https://pmjay.gov.in"
+  }
+]

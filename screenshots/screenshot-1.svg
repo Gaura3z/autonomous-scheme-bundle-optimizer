@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="100%" height="100%">
+  <rect width="1200" height="675" fill="#ffffff"/>
+  <!-- Header -->
+  <rect width="1200" height="70" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="50" y="45" font-family="system-ui" font-weight="900" font-size="28" fill="#047857">my<tspan fill="#0f172a">Scheme</tspan><tspan fill="#10b981">.</tspan></text>
+  <text x="210" y="44" font-family="system-ui" font-size="13" fill="#64748b">• is now powered by UMANG &amp; PS16</text>
+  
+  <!-- Center Search -->
+  <rect x="420" y="15" width="400" height="40" rx="20" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="450" y="40" font-family="system-ui" font-size="13" fill="#94a3b8">Enter scheme name to search...</text>
+
+  <!-- Right Actions -->
+  <rect x="980" y="17" width="100" height="36" rx="8" fill="#047857"/>
+  <text x="1010" y="40" font-family="system-ui" font-weight="bold" font-size="13" fill="#ffffff">Sign In →</text>
+  
+  <!-- Hero Left -->
+  <rect x="50" y="120" width="340" height="30" rx="15" fill="#ffedd5" stroke="#fed7aa"/>
+  <text x="70" y="140" font-family="system-ui" font-weight="bold" font-size="12" fill="#9a3412">Autonomous Scheme Bundle Optimizer • Kurukshetra 2.0</text>
+  
+  <text x="50" y="210" font-family="system-ui" font-weight="900" font-size="52" fill="#0f172a">One Platform,</text>
+  <text x="50" y="270" font-family="system-ui" font-weight="900" font-size="52" fill="#ea580c">Endless Opportunities</text>
+  
+  <text x="50" y="320" font-family="system-ui" font-size="16" fill="#475569">Explore verified Central and State Government schemes with automated eligibility checks,</text>
+  <text x="50" y="345" font-family="system-ui" font-size="16" fill="#475569">statutory conflict elimination, and sequenced application roadmaps.</text>
+
+  <!-- CTA Buttons -->
+  <rect x="50" y="380" width="220" height="52" rx="26" fill="#ea580c"/>
+  <text x="80" y="412" font-family="system-ui" font-weight="800" font-size="16" fill="#ffffff">Find Schemes For You →</text>
+
+  <rect x="290" y="380" width="180" height="52" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="320" y="412" font-family="system-ui" font-weight="700" font-size="15" fill="#0f172a">✨ Try Demo Citizen</text>
+
+  <!-- Hero Right: Phone Mockup -->
+  <rect x="800" y="110" width="280" height="500" rx="36" fill="#0f172a"/>
+  <rect x="810" y="125" width="260" height="470" rx="28" fill="#f8fafc"/>
+  
+  <!-- Badges around phone -->
+  <rect x="700" y="160" width="130" height="50" rx="14" fill="#ffffff" stroke="#a7f3d0" stroke-width="2"/>
+  <text x="715" y="185" font-family="system-ui" font-weight="bold" font-size="11" fill="#047857">HEALTHCARE</text>
+  <text x="715" y="200" font-family="system-ui" font-weight="800" font-size="12" fill="#0f172a">₹5L Cover</text>
+
+  <rect x="680" y="260" width="130" height="50" rx="14" fill="#ffffff" stroke="#bfdbfe" stroke-width="2"/>
+  <text x="695" y="285" font-family="system-ui" font-weight="bold" font-size="11" fill="#1e40af">EDUCATION</text>
+  <text x="695" y="300" font-family="system-ui" font-weight="800" font-size="12" fill="#0f172a">Scholarships</text>
+
+  <rect x="700" y="370" width="130" height="50" rx="14" fill="#ffffff" stroke="#fde68a" stroke-width="2"/>
+  <text x="715" y="395" font-family="system-ui" font-weight="bold" font-size="11" fill="#b45309">AGRICULTURE</text>
+  <text x="715" y="410" font-family="system-ui" font-weight="800" font-size="12" fill="#0f172a">PM-KISAN DBT</text>
+</svg>
