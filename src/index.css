@@ -1,1 +1,119 @@
 @import "tailwindcss";
+
+/* ==========================================================================
+   PRINT SPECIFIC CSS STYLES & CIVIC AUDIT EXPORT UTILITIES
+   Kurukshetra 2.0 HACKFEST 2026 PS16 - Autonomous Scheme-Bundle Optimizer
+   ========================================================================== */
+
+@page {
+  size: A4 portrait;
+  margin: 12mm 15mm 15mm 15mm;
+}
+
+@media print {
+  /* Clean white background and high-contrast text for document readability */
+  html, body {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* slate-900 */
+    font-size: 10.5pt !important;
+    line-height: 1.45 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Unclutter page: hide navigation, headers, footers, interactive buttons, floating widgets */
+  header,
+  nav,
+  footer,
+  aside,
+  button,
+  .print\:hidden,
+  .print-hidden,
+  [role="dialog"],
+  .fixed,
+  .sticky {
+    display: none !important;
+  }
+
+  /* Keep essential elements visible that might be inside hidden containers */
+  .print-keep {
+    display: block !important;
+  }
+
+  /* Avoid awkward page breaks across cards, scheme details, roadmap steps */
+  .print-avoid-break,
+  .page-break-inside-avoid,
+  article,
+  .rounded-2xl,
+  .rounded-3xl,
+  table,
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Force intentional page breaks where appropriate */
+  .print-page-break {
+    break-before: page !important;
+    page-break-before: always !important;
+  }
+
+  /* Remove heavy box-shadows, animations, and transitions */
+  *, *::before, *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Ensure card borders are crisp and clean for monochrome and color printing */
+  .border,
+  .border-2,
+  .border-slate-200,
+  .border-emerald-200,
+  .border-blue-200 {
+    border-color: #cbd5e1 !important; /* slate-300 */
+  }
+
+  /* Soften colored background cards to preserve printer toner/ink */
+  .bg-slate-50,
+  .bg-emerald-50,
+  .bg-emerald-50\/30,
+  .bg-emerald-50\/40,
+  .bg-blue-50,
+  .bg-amber-50,
+  .bg-purple-50,
+  .bg-purple-50\/40 {
+    background-color: #f8fafc !important; /* slate-50 */
+  }
+
+  /* Print Header banner: visible only during print */
+  .print-header-banner {
+    display: block !important;
+    margin-bottom: 1.5rem !important;
+    padding-bottom: 0.75rem !important;
+    border-bottom: 2px solid #0f172a !important;
+  }
+
+  /* Force links to look like neat printed text without underlines */
+  a {
+    text-decoration: none !important;
+    color: #0f172a !important;
+  }
+
+  /* Display URLs for critical official portals when printed */
+  .print-show-url::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    font-family: monospace;
+    color: #475569;
+  }
+}
+
+/* Screen state for print-only elements */
+@media screen {
+  .print-header-banner {
+    display: none !important;
+  }
+}
+

@@ -67,7 +67,7 @@ export const DemoBanner: React.FC<DemoBannerProps> = ({
   return (
     <>
       {/* High-visibility sticky demo banner below navbar */}
-      <aside aria-label="Demo Persona Controller" className="w-full bg-gradient-to-r from-amber-600 via-amber-700 to-orange-700 text-white shadow-md border-b-2 border-amber-400/50 py-2 px-4 sm:px-6 lg:px-8 relative z-30">
+      <aside aria-label="Demo Persona Controller" className="w-full bg-gradient-to-r from-amber-600 via-amber-700 to-orange-700 text-white shadow-md border-b-2 border-amber-400/50 py-2 px-4 sm:px-6 lg:px-8 relative z-30 print:hidden">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           {/* Left: Persona Identity & Prototype Tag */}
           <div className="flex items-center gap-3">
@@ -142,22 +142,6 @@ export const DemoBanner: React.FC<DemoBannerProps> = ({
                 </div>
               )}
             </div>
-
-            {/* Tech Stack & Architecture Button */}
-            <button
-              onClick={() => {
-                if (onOpenArchitecture) {
-                  onOpenArchitecture();
-                } else {
-                  window.dispatchEvent(new CustomEvent('open-architecture-modal'));
-                }
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/30 hover:bg-black/40 text-amber-100 hover:text-white text-xs font-bold border border-amber-300/40 transition-colors cursor-pointer"
-              title="View Fixed Tech Stack & Architecture"
-            >
-              <Workflow className="w-3.5 h-3.5 text-amber-300" />
-              <span className="hidden sm:inline">Architecture</span>
-            </button>
 
             {/* Judge Evaluation Insights Button */}
             <button

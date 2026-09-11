@@ -21,11 +21,11 @@ interface StepMeta {
 
 const STEPS: StepMeta[] = [
   { key: 'PROFILE', label: 'Profile', stageOrder: 1 },
-  { key: 'CANDIDATE_MATCH', label: 'Matching', stageOrder: 2 },
-  { key: 'QUESTIONNAIRE', label: 'Questions', stageOrder: 3 },
+  { key: 'QUESTIONNAIRE', label: 'Matching & Questions', stageOrder: 2 },
+  { key: 'DOCUMENT_CHECKLIST', label: 'Documents', stageOrder: 3 },
   { key: 'ELIGIBILITY_RESULTS', label: 'Eligibility', stageOrder: 4 },
-  { key: 'OPTIMIZED_BUNDLE', label: 'Bundle', stageOrder: 5 },
-  { key: 'DOCUMENT_CHECKLIST', label: 'Documents', stageOrder: 6 },
+  { key: 'CONFLICT_DETECTION', label: 'Conflicts', stageOrder: 5 },
+  { key: 'OPTIMIZED_BUNDLE', label: 'Bundle', stageOrder: 6 },
   { key: 'DOCUMENT_READINESS', label: 'Readiness', stageOrder: 7 },
   { key: 'APPLICATION_ROADMAP', label: 'Roadmap', stageOrder: 8 },
 ];
@@ -43,7 +43,7 @@ function getStageOrder(stage: AssessmentStage): number {
       return 2;
     case 'questionnaire':
     case 'QUESTIONNAIRE':
-      return 3;
+      return 2.5;
     case 'processing':
     case 'PROCESSING':
       return 3.5;
@@ -52,13 +52,13 @@ function getStageOrder(stage: AssessmentStage): number {
       return 4;
     case 'conflicts':
     case 'CONFLICT_DETECTION':
-      return 4.5;
+      return 5;
     case 'bundle':
     case 'OPTIMIZED_BUNDLE':
-      return 5;
+      return 6;
     case 'documents_checklist':
     case 'DOCUMENT_CHECKLIST':
-      return 6;
+      return 3;
     case 'readiness':
     case 'DOCUMENT_READINESS':
       return 7;

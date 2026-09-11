@@ -139,23 +139,23 @@ export default function App() {
 
   // 5. PuLP/CBC Mathematical Optimizer Bundle
   const bundle = useMemo(() => {
-    return optimizeSchemeBundle(eligibleSchemes);
-  }, [eligibleSchemes]);
+    return optimizeSchemeBundle(eligibleSchemes, declaredDocumentIds);
+  }, [eligibleSchemes, declaredDocumentIds]);
 
   // 6. Document readiness categorization (Ready vs Missing)
   const readiness = useMemo(() => {
-    return evaluateDocumentReadiness(bundle.selectedSchemes, declaredDocumentIds);
+    return evaluateDocumentReadiness(bundle.potentialSelectedSchemes ?? bundle.selectedSchemes, declaredDocumentIds);
   }, [bundle.selectedSchemes, declaredDocumentIds]);
 
   // 7. Document dependency graph
   const documentDependencyNodes = useMemo(() => {
-    return buildDocumentDependencyGraph(bundle.selectedSchemes, declaredDocumentIds);
-  }, [bundle.selectedSchemes, declaredDocumentIds]);
+    return buildDocumentDependencyGraph(bundle.potentialSelectedSchemes ?? bundle.selectedSchemes, declaredDocumentIds);
+  }, [bundle.potentialSelectedSchemes, bundle.selectedSchemes, declaredDocumentIds]);
 
   // 8. Actionable Application Roadmap
   const roadmapSteps = useMemo(() => {
-    return generateApplicationRoadmap(readiness, bundle.selectedSchemes);
-  }, [readiness, bundle.selectedSchemes]);
+    return generateApplicationRoadmap(readiness, bundle.potentialSelectedSchemes ?? bundle.selectedSchemes);
+  }, [readiness, bundle.potentialSelectedSchemes, bundle.selectedSchemes]);
 
   // Document checklist toggling
   const handleToggleDocument = (docId: string) => {
@@ -166,7 +166,7 @@ export default function App() {
 
   const handleSelectAllDocuments = () => {
     const allRequired = Array.from(
-      new Set(bundle.selectedSchemes.flatMap((s) => s.requiredDocumentIds))
+      new Set(eligibleSchemes.flatMap((s) => s.requiredDocumentIds))
     );
     setDeclaredDocumentIds(allRequired);
   };
@@ -245,7 +245,7 @@ export default function App() {
               <AdaptiveQuestionnaire
                 profile={profile}
                 onChangeProfile={handleUpdateProfile}
-                onComplete={() => setStage('PROCESSING')}
+                onComplete={() => setStage('DOCUMENT_CHECKLIST')}
                 onBack={() => setStage('CANDIDATE_MATCH')}
               />
             )}
@@ -265,31 +265,31 @@ export default function App() {
               />
             )}
 
+            {normalizedStage === 'DOCUMENT_CHECKLIST' && (
+              <DocumentChecklist
+                bundleSchemes={candidateSchemes}
+                declaredDocumentIds={declaredDocumentIds}
+                onToggleDocument={handleToggleDocument}
+                onSelectAll={handleSelectAllDocuments}
+                onClearAll={handleClearAllDocuments}
+                onProceedToReadiness={() => setStage('PROCESSING')}
+                onBackToBundle={() => setStage('QUESTIONNAIRE')}
+              />
+            )}
+
             {normalizedStage === 'CONFLICT_DETECTION' && (
               <ConflictDetection
                 conflicts={conflicts}
                 onProceedToBundle={() => setStage('OPTIMIZED_BUNDLE')}
-                onBackToResults={() => setStage('ELIGIBILITY_RESULTS')}
+                onBackToResults={() => setStage('DOCUMENT_CHECKLIST')}
               />
             )}
 
             {normalizedStage === 'OPTIMIZED_BUNDLE' && (
               <OptimizedBundleView
                 bundle={bundle}
-                onProceedToDocuments={() => setStage('DOCUMENT_CHECKLIST')}
+                onProceedToDocuments={() => setStage('DOCUMENT_READINESS')}
                 onBackToConflicts={() => setStage('CONFLICT_DETECTION')}
-              />
-            )}
-
-            {normalizedStage === 'DOCUMENT_CHECKLIST' && (
-              <DocumentChecklist
-                bundleSchemes={bundle.selectedSchemes}
-                declaredDocumentIds={declaredDocumentIds}
-                onToggleDocument={handleToggleDocument}
-                onSelectAll={handleSelectAllDocuments}
-                onClearAll={handleClearAllDocuments}
-                onProceedToReadiness={() => setStage('DOCUMENT_READINESS')}
-                onBackToBundle={() => setStage('OPTIMIZED_BUNDLE')}
               />
             )}
 
@@ -325,6 +325,7 @@ export default function App() {
                 roadmapSteps={roadmapSteps}
                 onRestart={handleReset}
                 onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
+                onBackToRoadmap={() => setStage('APPLICATION_ROADMAP')}
               />
             )}
           </motion.div>

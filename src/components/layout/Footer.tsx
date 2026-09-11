@@ -93,16 +93,12 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="flex items-baseline gap-1">
                 <span className="text-lg font-black text-white">my</span>
                 <span className="text-lg font-black text-blue-400">Scheme</span>
-                <span className="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                  PS16
-                </span>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Autonomous citizen-benefits decision support and scheme-bundle optimizer with deterministic eligibility, conflict resolution, document inventory, and actionable application roadmaps.
+              Citizen scheme discovery, eligibility guidance, and actionable application roadmaps.
             </p>
             <div className="text-[11px] text-slate-500">
-              Developed for Kurukshetra 2.0 Hackfest 2026.
             </div>
           </div>
 
@@ -142,24 +138,6 @@ export const Footer: React.FC<FooterProps> = ({
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Ministry Gazette Knowledge Base
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={onOpenArchitecture || onOpenHowItWorks}
-                  className="hover:text-blue-300 text-blue-400 flex items-center gap-1 font-semibold transition-colors cursor-pointer"
-                >
-                  <Layers className="w-3 h-3" />
-                  Fixed Tech Stack & Architecture
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={onOpenDemoSelector}
-                  className="hover:text-amber-300 text-amber-400 flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Try Demo Personas
                 </button>
               </li>
             </ul>

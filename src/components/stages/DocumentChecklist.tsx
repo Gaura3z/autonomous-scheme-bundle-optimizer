@@ -1,5 +1,5 @@
 /**
- * Page 9: Document Checklist Inventory
+ * Page 5: Document Declaration before conflict resolution and optimization
  * Extremely clean, privacy-preserving checkbox selection.
  * No uploads or credential demands.
  * Kurukshetra 2.0 HACKFEST 2026 PS16
@@ -69,13 +69,13 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
       {/* Header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider">
-          Stage 7 • Document Inventory
+          Stage 5 • Quick Document Check
         </span>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-          Which documents do you already have?
+          Which required documents do you already have?
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Tick the documents currently in your physical or digital possession. This helps us create a realistic, personalized application sequence.
+          We ask only about documents relevant to schemes you may qualify for. Your answers decide what can be filed today; they do not decide eligibility.
         </p>
 
         {/* Privacy Notice */}
@@ -175,14 +175,14 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
           onClick={onBackToBundle}
           className="text-xs font-semibold text-slate-600 hover:text-slate-900 py-2 px-4 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
         >
-          ← Back to Bundle
+          ← Back to Questions
         </button>
 
         <button
           onClick={onProceedToReadiness}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-900/20 transition-all hover:translate-x-0.5 cursor-pointer"
         >
-          Check Document Readiness
+          Continue to conflict-safe bundle
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

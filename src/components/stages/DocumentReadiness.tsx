@@ -15,7 +15,8 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Building2
+  Building2,
+  Printer
 } from 'lucide-react';
 import { DocumentReadiness, Scheme, DocumentInfo } from '../../types';
 
@@ -32,24 +33,65 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
 }) => {
   const [selectedDocForGuidance, setSelectedDocForGuidance] = useState<DocumentInfo | null>(null);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-10">
-      {/* Header */}
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-10 print:py-2 print:px-0">
+      {/* Official Print Watermark Banner */}
+      <div className="print-header-banner">
+        <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
+          <div>
+            <div className="text-[10pt] font-extrabold uppercase tracking-wider text-slate-800">
+              Government of India • National myScheme Portal
+            </div>
+            <h1 className="text-xl font-black text-slate-900 mt-0.5">
+              Document Readiness & Procurement Audit
+            </h1>
+            <div className="text-xs text-slate-600 mt-0.5">
+              Autonomous Scheme-Bundle Optimizer (PS16) • Ready Applications vs. Missing Certificates
+            </div>
+          </div>
+          <div className="text-right text-[9pt] text-slate-600 font-mono">
+            <div>Date: {new Date().toLocaleDateString('en-IN')}</div>
+            <div>Ready: {readiness.readySchemes.length} Schemes</div>
+            <div>Action Required: {readiness.documentMissingSchemes.length} Schemes</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Screen Header */}
       <div className="mb-8">
-        <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
-          Stage 8 • Readiness Separation
-        </span>
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-          Document Readiness Assessment
-        </h2>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          We compare your declared documents against scheme filing requirements to separate immediate opportunities from those needing certificate issuance.
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+              Stage 8 • Readiness Separation
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+              Document Readiness Assessment
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              We compare your declared documents against scheme filing requirements to separate immediate opportunities from those needing certificate issuance.
+            </p>
+          </div>
+
+          <div className="print:hidden shrink-0">
+            <button
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              title="Print Document Readiness Report"
+            >
+              <Printer className="w-4 h-4 text-emerald-800" />
+              <span>Print / Save PDF</span>
+            </button>
+          </div>
+        </div>
 
         {/* Civic Principle Notice */}
-        <div className="mt-4 p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-start gap-3">
+        <div className="mt-4 p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-start gap-3 print:bg-white print:border-slate-300 print:rounded-none">
           <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-          <div className="text-xs text-emerald-950 leading-relaxed">
+          <div className="text-xs text-emerald-950 leading-relaxed print:text-black">
             <strong>System Principle:</strong> Missing a document does <em>not</em> mean you are ineligible. You have fully qualified under the statutory criteria; you simply need to procure the missing proof to complete your application.
           </div>
         </div>
@@ -76,15 +118,15 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
             {readiness.readySchemes.map((scheme) => (
               <div
                 key={scheme.id}
-                className="bg-white rounded-2xl border-2 border-emerald-300 p-5 shadow-2xs hover:border-emerald-500 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="bg-white rounded-2xl border-2 border-emerald-300 p-5 shadow-2xs hover:border-emerald-500 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 print-avoid-break print:rounded-none print:border-slate-300 print:p-3"
               >
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
                       {scheme.category}
                     </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-xs font-bold text-emerald-700">
+                    <span className="text-slate-300 print:hidden">•</span>
+                    <span className="text-xs font-bold text-emerald-700 print:text-black">
                       ✓ Instant Online Filing Possible
                     </span>
                   </div>
@@ -98,18 +140,21 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
                 </div>
 
                 <div className="sm:text-right shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
-                  <span className="text-sm font-extrabold text-emerald-800 block">
+                  <span className="text-sm font-extrabold text-emerald-800 print:text-black block">
                     {scheme.benefit.displayAmount}
                   </span>
                   <a
                     href={scheme.officialSourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline mt-1"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:underline mt-1 print:hidden"
                   >
                     Portal Guide
                     <ExternalLink className="w-3 h-3" />
                   </a>
+                  <span className="hidden print:block text-[9pt] font-mono text-slate-600">
+                    {scheme.officialSourceUrl}
+                  </span>
                 </div>
               </div>
             ))}
@@ -138,16 +183,16 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
             {readiness.documentMissingSchemes.map(({ scheme, missingDocuments }) => (
               <div
                 key={scheme.id}
-                className="bg-white rounded-2xl border border-amber-200 p-5 shadow-2xs hover:border-amber-300 transition-all"
+                className="bg-white rounded-2xl border border-amber-200 p-5 shadow-2xs hover:border-amber-300 transition-all print-avoid-break print:rounded-none print:border-slate-300 print:p-3"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded print:border print:border-slate-300 print:bg-white print:text-black">
                         ✓ Eligibility Conditions Met
                       </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded">
+                      <span className="text-slate-300 print:hidden">•</span>
+                      <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded print:border print:border-slate-300 print:bg-white print:text-black">
                         ⚠ {missingDocuments.length} document(s) missing
                       </span>
                     </div>
@@ -160,14 +205,14 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
                     </p>
                   </div>
 
-                  <span className="text-sm font-extrabold text-blue-900 shrink-0">
+                  <span className="text-sm font-extrabold text-blue-900 print:text-black shrink-0">
                     {scheme.benefit.displayAmount}
                   </span>
                 </div>
 
                 {/* Missing Document Pills with "How to get" button */}
-                <div className="bg-amber-50/50 rounded-xl p-3 border border-amber-200/60">
-                  <span className="text-[11px] font-bold text-amber-900 block mb-2">
+                <div className="bg-amber-50/50 rounded-xl p-3 border border-amber-200/60 print:bg-white print:border-slate-300">
+                  <span className="text-[11px] font-bold text-amber-900 print:text-slate-900 block mb-2">
                     Missing Documents Required for this Application:
                   </span>
 
@@ -176,11 +221,11 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
                       <button
                         key={doc.id}
                         onClick={() => setSelectedDocForGuidance(doc)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-800 border border-amber-300 hover:bg-amber-100/60 transition-colors cursor-pointer shadow-2xs"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-800 border border-amber-300 hover:bg-amber-100/60 transition-colors cursor-pointer shadow-2xs print:border-slate-400 print:shadow-none"
                       >
-                        <FileText className="w-3.5 h-3.5 text-amber-600" />
+                        <FileText className="w-3.5 h-3.5 text-amber-600 print:text-black" />
                         <span>{doc.name}</span>
-                        <span className="text-[10px] text-blue-700 underline font-semibold ml-1">
+                        <span className="text-[10px] text-blue-700 underline font-semibold ml-1 print:hidden">
                           How to get?
                         </span>
                       </button>
@@ -195,7 +240,7 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
 
       {/* "How to get this document" Detail Modal */}
       {selectedDocForGuidance && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative animate-in zoom-in-95 duration-150">
             <h4 className="text-base font-bold text-slate-900 mb-1">
               How to Obtain: {selectedDocForGuidance.name}
@@ -254,7 +299,7 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
       )}
 
       {/* Navigation Footer */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
         <button
           onClick={onBackToChecklist}
           className="text-xs font-semibold text-slate-600 hover:text-slate-900 py-2 px-4 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"

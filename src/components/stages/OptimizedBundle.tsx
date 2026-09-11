@@ -64,10 +64,31 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
           Your Recommended Scheme Bundle
         </h2>
-        <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-          We found a combination of schemes that works together legally and provides the best overall fit for your profile without triggering clawbacks or deduplication rejections.
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+          This is your document-ready bundle: schemes that are eligible, legally compatible, and actionable with the documents you declared.
         </p>
       </div>
+
+      {(bundle.potentialSelectedSchemes?.length ?? 0) > bundle.selectedSchemes.length && (
+        <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-amber-950">Higher-value potential bundle identified</h3>
+              <p className="text-xs text-amber-900 mt-1 leading-relaxed">
+                The theoretical compatible bundle is worth ₹{(bundle.potentialTotalMonetaryAnnual ?? 0).toLocaleString('en-IN')} per year. {bundle.documentBlockedSchemes?.length ?? 0} scheme(s) are currently gated by missing documents, so they are shown separately instead of being presented as immediately actionable.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {bundle.documentBlockedSchemes?.map(({ scheme, missingDocumentIds }) => (
+                  <span key={scheme.id} className="rounded-lg border border-amber-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-amber-900">
+                    {scheme.shortName} · {missingDocumentIds.length} missing document{missingDocumentIds.length === 1 ? '' : 's'}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Aggregate Value Highlight Card */}
       <div className="bg-gradient-to-br from-blue-950 via-slate-900 to-blue-900 text-white rounded-3xl p-6 sm:p-8 shadow-lg border border-blue-900/50 mb-8 relative overflow-hidden">
@@ -246,7 +267,7 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
           onClick={onProceedToDocuments}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-900/20 transition-all hover:translate-x-0.5 cursor-pointer"
         >
-          Check My Documents
+          Review document readiness
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

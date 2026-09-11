@@ -7,7 +7,7 @@
 import { Scheme, OptimizedBundle } from '../types';
 import { areSchemesConflicted } from './conflicts';
 
-export function optimizeSchemeBundle(eligibleSchemes: Scheme[]): OptimizedBundle {
+export function optimizeSchemeBundle(eligibleSchemes: Scheme[], declaredDocumentIds?: string[]): OptimizedBundle {
   if (eligibleSchemes.length === 0) {
     return {
       selectedSchemes: [],
@@ -19,6 +19,8 @@ export function optimizeSchemeBundle(eligibleSchemes: Scheme[]): OptimizedBundle
       optimalityMetric: 'No eligible candidate schemes to optimize.'
     };
   }
+
+  const declared = new Set(declaredDocumentIds ?? []);
 
   // Sort eligible schemes by objective priority:
   // 1. Monetary value descending
@@ -43,35 +45,38 @@ export function optimizeSchemeBundle(eligibleSchemes: Scheme[]): OptimizedBundle
     return a.id.localeCompare(b.id);
   });
 
-  const selected: Scheme[] = [];
-  const rejected: { scheme: Scheme; rejectionReason: string; conflictedWith?: Scheme }[] = [];
-  let conflictsResolvedCount = 0;
+  const selectCompatible = (candidatePool: Scheme[]) => {
+    const selected: Scheme[] = [];
+    const rejected: { scheme: Scheme; rejectionReason: string; conflictedWith?: Scheme }[] = [];
+    let conflictsResolvedCount = 0;
 
-  for (const candidate of candidates) {
-    // Check if candidate conflicts with any already-selected scheme
-    let conflictingSelected: Scheme | null = null;
-    let conflictReason = '';
-
-    for (const sel of selected) {
-      const conflict = areSchemesConflicted(candidate.id, sel.id);
-      if (conflict) {
-        conflictingSelected = sel;
-        conflictReason = conflict.reason;
-        break;
+    for (const candidate of [...candidatePool].sort((a, b) => {
+      const valueDiff = b.benefit.monetaryValueAnnualPaise - a.benefit.monetaryValueAnnualPaise;
+      return valueDiff || a.id.localeCompare(b.id);
+    })) {
+      const conflictingSelected = selected.find((sel) => areSchemesConflicted(candidate.id, sel.id));
+      if (conflictingSelected) {
+        conflictsResolvedCount++;
+        rejected.push({
+          scheme: candidate,
+          rejectionReason: `Mutually exclusive with ${conflictingSelected.shortName}; the higher-value compatible option was retained.`,
+          conflictedWith: conflictingSelected
+        });
+      } else {
+        selected.push(candidate);
       }
     }
+    return { selected, rejected, conflictsResolvedCount };
+  };
 
-    if (conflictingSelected) {
-      conflictsResolvedCount++;
-      rejected.push({
-        scheme: candidate,
-        rejectionReason: `Mutually exclusive with ${conflictingSelected.shortName}. The optimizer retained ${conflictingSelected.shortName} due to higher direct financial/subsidy impact (₹${(conflictingSelected.benefit.monetaryValueAnnualPaise / 100).toLocaleString('en-IN')}/yr vs ₹${(candidate.benefit.monetaryValueAnnualPaise / 100).toLocaleString('en-IN')}/yr).`,
-        conflictedWith: conflictingSelected
-      });
-    } else {
-      selected.push(candidate);
-    }
-  }
+  const potential = selectCompatible(eligibleSchemes);
+  const readyCandidates = declaredDocumentIds === undefined
+    ? eligibleSchemes
+    : eligibleSchemes.filter((scheme) => scheme.requiredDocumentIds.every((id) => declared.has(id)));
+  const selectedResult = selectCompatible(readyCandidates);
+  const selected = selectedResult.selected;
+  const rejected = selectedResult.rejected;
+  const conflictsResolvedCount = selectedResult.conflictsResolvedCount;
 
   // Calculate totals
   const totalMonetaryAnnual = selected.reduce(
@@ -93,6 +98,16 @@ export function optimizeSchemeBundle(eligibleSchemes: Scheme[]): OptimizedBundle
     nonMonetaryBenefits,
     conflictsResolvedCount,
     solverStatus: 'Optimal',
-    optimalityMetric: `Optimal Feasible Solution: Maximized profile utility across ${selected.length} compatible welfare programs, successfully enforcing ${conflictsResolvedCount} conflict constraint(s).`
+    optimalityMetric: declaredDocumentIds === undefined
+      ? `Optimal Feasible Solution: Maximized profile utility across ${selected.length} compatible welfare programs.`
+      : `Document-aware solution: selected ${selected.length} schemes that are both eligible, conflict-free, and ready to file today. ${potential.selected.length - selected.length} potential scheme(s) remain document-gated.`,
+    potentialSelectedSchemes: potential.selected,
+    potentialTotalMonetaryAnnual: potential.selected.reduce((sum, s) => sum + s.benefit.monetaryValueAnnualPaise / 100, 0),
+    documentBlockedSchemes: potential.selected
+      .filter((scheme) => !selected.some((ready) => ready.id === scheme.id))
+      .map((scheme) => ({
+        scheme,
+        missingDocumentIds: scheme.requiredDocumentIds.filter((id) => !declared.has(id))
+      }))
   };
 }

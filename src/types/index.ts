@@ -177,6 +177,11 @@ export interface OptimizedBundle {
   conflictsResolvedCount: number;
   solverStatus: 'Optimal' | 'Feasible_Fallback';
   optimalityMetric: string;
+  /** Schemes that would be selected if all eligible documents were available. */
+  potentialSelectedSchemes?: Scheme[];
+  potentialTotalMonetaryAnnual?: number;
+  /** Potential winners that are blocked from immediate filing by missing documents. */
+  documentBlockedSchemes?: { scheme: Scheme; missingDocumentIds: string[] }[];
 }
 
 export interface DocumentInfo {

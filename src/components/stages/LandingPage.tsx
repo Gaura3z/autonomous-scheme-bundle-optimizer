@@ -251,15 +251,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </span>
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ml-0.5 mb-2 inline-block" />
                   </div>
-                  <span className="text-xs font-semibold text-slate-400">•</span>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-600">
-                    is now powered by <strong className="text-blue-900 font-bold">UMANG & PS16</strong>
-                  </span>
-                </div>
-
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100/90 text-orange-950 text-xs font-bold border border-orange-200 shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-orange-600 animate-ping" />
-                  <span>Autonomous Scheme Bundle Optimizer • Kurukshetra 2.0</span>
                 </div>
               </div>
 
@@ -306,30 +297,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 </motion.button>
 
-                {/* Pre-configured Demo Persona Button */}
-                <motion.button
-                  onClick={onOpenDemoSelector}
-                  whileHover={{ scale: 1.03, y: -1 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border-2 border-slate-300 shadow-2xs transition-all cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Try Demo Citizen</span>
-                </motion.button>
               </motion.div>
-
-              {/* QR Code & Mobile App Discovery (Matches Screenshot 1 QR Feature) */}
-              <div className="pt-4 flex items-center gap-4 border-t border-slate-200/80">
-                <div className="p-2 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-center">
-                  <QrCode className="w-10 h-10 text-slate-900" />
-                </div>
-                <div className="text-left text-xs">
-                  <span className="font-bold text-slate-900 block">Scan the QR Code</span>
-                  <span className="text-slate-500">
-                    Access myScheme on mobile or UMANG app with zero document uploads.
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Right Column: Phone Mockup with Dotted Path & Floating Sector Badges (Matches Screenshot 1) */}
@@ -779,7 +747,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* 3.5. HACKATHON JUDGE DEMONSTRATION SHOWCASE (Kurukshetra 2.0 PS16) */}
+      {false && <>
+      {/* Advanced demo and architecture showcase is kept in code for review, but not shown in the citizen landing path. */}
       <section className="py-14 sm:py-18 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-left bg-gradient-to-b from-slate-50 to-white rounded-3xl border border-slate-200/80 my-8 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
@@ -1081,6 +1050,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
+      </>}
+
       {/* 4. FEATURED SCHEMES SHOWCASE */}
       <section className="py-14 sm:py-18 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-left">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
@@ -1156,7 +1127,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* 5. FLOATING INTERACTIVE SCHEMEBOT MASCOT (As Seen in Screenshot 2 Bottom-Right) */}
+      {false && <>
+      {/* Optional assistant is intentionally hidden from the focused citizen workflow. */}
       <div className="fixed bottom-6 right-6 z-50 print:hidden">
         {/* The Animated Floating Mascot Button */}
         <motion.button
@@ -1267,7 +1239,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </div></>}
     </div>
   );
 };
