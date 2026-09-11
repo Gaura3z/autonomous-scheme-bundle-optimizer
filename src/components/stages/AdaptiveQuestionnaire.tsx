@@ -39,18 +39,21 @@ export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
         return profile.isStudent || profile.educationLevel === 'Undergraduate' || profile.educationLevel === 'Postgraduate';
       }
       if (q.id === 'q_street_vending') {
-        return profile.areaType !== 'Rural' && (profile.employmentStatus === 'Self-Employed' || profile.employmentStatus === 'Daily Wage Worker');
+        return profile.areaType !== 'Rural' && (profile.employmentStatus === 'Self-Employed' || profile.employmentStatus === 'Daily Wage Worker') && !profile.isStudent;
       }
       if (q.id === 'q_woman_entrepreneur') {
-        return profile.gender === 'Female' || profile.socialCategory === 'SC' || profile.socialCategory === 'ST';
+        return profile.gender === 'Female' && (profile.employmentStatus === 'Self-Employed' || profile.employmentStatus === 'Unemployed');
       }
       if (q.id === 'q_apprenticeship') {
-        return profile.age >= 16 && profile.age <= 35 && !profile.isFarmer;
+        return profile.age >= 16 && profile.age <= 30 && !profile.isFarmer && profile.employmentStatus !== 'Self-Employed';
       }
       if (q.id === 'q_girl_child') {
-        return profile.age >= 18;
+        return (profile.gender === 'Female' || profile.maritalStatus === 'Married') && !profile.isStudent && !profile.isFarmer;
       }
       if (q.id === 'q_farmer_landholding') {
+        return profile.isFarmer;
+      }
+      if (q.id === 'q_rainfed_land') {
         return profile.isFarmer;
       }
       return true;

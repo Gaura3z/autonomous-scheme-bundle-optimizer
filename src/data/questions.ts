@@ -57,5 +57,13 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     max: 25,
     step: 0.1,
     unit: 'Hectares'
+  },
+  {
+    id: 'q_rainfed_land',
+    field: 'isRainfedLand',
+    title: 'Is your operational agricultural land predominantly rainfed (un-irrigated)?',
+    contextExplanation: 'PM Fasal Bima Yojana provides tailored actuarial premium caps and prioritized localized drought and mid-season calamity coverage for rainfed plots.',
+    schemeJustification: 'Evaluates: PMFBY localized risk assessment and calamity protection tier.',
+    type: 'boolean'
   }
 ];

@@ -49,5 +49,16 @@ export const MASTER_CONFLICTS: SchemeConflict[] = [
     officialCircularReference: 'Ministry of Rural Development Skills Division Norms §8.4',
     consequence: 'Candidate biometric attendance failure in either programme triggers stipend forfeiture.',
     resolutionAdvice: 'Complete DDU-GKY skilling first; NAPS apprenticeship can be pursued immediately upon certification.'
+  },
+  {
+    id: 'conflict_standup_vs_mudra',
+    schemeIdA: 'standup_india',
+    schemeIdB: 'pmmy_shishu',
+    schemeAName: 'Stand-Up India Scheme',
+    schemeBName: 'Pradhan Mantri Mudra Yojana (PMMY - Shishu/Kishore)',
+    reason: 'Dual Central Subsidized Credit Prohibition: Department of Financial Services (DFS) statutory guidelines forbid availing subsidized greenfield enterprise credit under Stand-Up India (₹10 Lakh - ₹1 Crore) while simultaneously drawing Mudra refinance micro-credit for the same business unit.',
+    officialCircularReference: 'Ministry of Finance (DFS) Credit Directive Ref. DFS/SUI-PMMY/2022 §3',
+    consequence: 'Simultaneous application causes duplicate sanction alerts on the RBI CRILC/CIBIL commercial registry, leading to loan cancellation.',
+    resolutionAdvice: 'For substantial greenfield enterprise setup with capital equipment (up to ₹1 Crore), select Stand-Up India. For immediate small working capital without extensive project reports, select Mudra.'
   }
 ];

@@ -4,9 +4,21 @@
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
 import React from 'react';
-import { X, Sparkles, GraduationCap, Briefcase, Tractor, ArrowRight } from 'lucide-react';
+import { 
+  X, 
+  Sparkles, 
+  GraduationCap, 
+  Briefcase, 
+  Tractor, 
+  ArrowRight,
+  AlertTriangle,
+  CheckCircle2,
+  FileText,
+  Workflow
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DEMO_PROFILES } from '../../data/demoProfiles';
+import { DEMO_JOURNEYS } from '../../data/demoJourneys';
 import { DemoCitizenProfile } from '../../types';
 
 interface DemoProfileModalProps {
@@ -40,7 +52,7 @@ export const DemoProfileModal: React.FC<DemoProfileModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 14 }}
             transition={{ type: 'spring', damping: 26, stiffness: 360 }}
-            className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative z-10"
+            className="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative z-10 max-h-[90vh] overflow-y-auto"
             role="dialog"
             aria-modal="true"
           >
@@ -60,21 +72,27 @@ export const DemoProfileModal: React.FC<DemoProfileModalProps> = ({
                 <Sparkles className="w-5 h-5 animate-spin-slow" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900">
-                  Select a Demo Citizen Profile
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-slate-900">
+                    Select a Demonstration Citizen Persona
+                  </h3>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                    Prototype Data
+                  </span>
+                </div>
                 <p className="text-xs text-slate-500">
-                  Live Evaluation Personas for Hackathon Judges & Demonstrators
+                  Deterministic evaluation scenarios for Kurukshetra 2.0 PS16 Hackfest Judges
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-slate-600 mb-6 leading-relaxed">
-              Selecting a demo persona immediately loads their verified profile and pre-declared documents into the decision pipeline, demonstrating deterministic pathing and conflict resolution.
+              Every persona passes through the <strong>exact same product journey</strong> (Profile → Candidates → Adaptive Questions → Analysis → Results → Conflicts → Bundle → Documents → Readiness → Dependencies → Roadmap). Selecting a persona loads deterministic inputs to verify specific engine outcomes.
             </p>
 
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               {DEMO_PROFILES.map((demo, idx) => {
+                const journey = DEMO_JOURNEYS[demo.id] || DEMO_JOURNEYS.demo_student;
                 const Icon = demo.id === 'demo_student' 
                   ? GraduationCap 
                   : demo.id === 'demo_woman_artisan' 
@@ -82,59 +100,99 @@ export const DemoProfileModal: React.FC<DemoProfileModalProps> = ({
                   : Tractor;
 
                 return (
-                  <motion.button
+                  <motion.div
                     key={demo.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.06 }}
-                    whileHover={{ scale: 1.015, y: -2 }}
-                    whileTap={{ scale: 0.985 }}
-                    onClick={() => {
-                      onSelectProfile(demo);
-                      onClose();
-                    }}
-                    className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 transition-colors group flex items-start gap-4 cursor-pointer shadow-2xs hover:shadow-xs"
+                    className="p-5 rounded-2xl border-2 border-slate-200 hover:border-blue-600 hover:bg-blue-50/20 transition-all group flex flex-col gap-3 shadow-2xs hover:shadow-md text-left"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-                      <Icon className="w-5 h-5" />
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-900 text-white font-bold flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-base font-bold text-slate-900 group-hover:text-blue-900 transition-colors">
+                              {demo.name}
+                            </h4>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                              {demo.badge}
+                            </span>
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              Demo Persona
+                            </span>
+                          </div>
+                          <p className="text-xs font-semibold text-slate-600">
+                            {demo.roleTitle} • {demo.profile.state} ({demo.profile.areaType}) • Income: ₹{(demo.profile.annualFamilyIncome).toLocaleString('en-IN')}/yr
+                          </p>
+                        </div>
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.04, x: 2 }}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => {
+                          onSelectProfile(demo);
+                          onClose();
+                        }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs cursor-pointer shrink-0"
+                      >
+                        <span>Select Persona</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </motion.button>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-900 transition-colors">
-                          {demo.name}
-                        </h4>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-                          {demo.badge}
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      {demo.shortSummary}
+                    </p>
+
+                    {/* Algorithmic Highlights Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-[11px]">
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                        <span className="font-bold text-slate-400 uppercase text-[9px] block">
+                          1. Adaptive Questions
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {journey.expectedHighlight.adaptiveQuestionsCount} Sector Questions
                         </span>
                       </div>
 
-                      <p className="text-xs font-medium text-slate-600 mb-1.5">
-                        {demo.roleTitle} • State: {demo.profile.state} • Income: ₹{(demo.profile.annualFamilyIncome).toLocaleString('en-IN')}/yr
-                      </p>
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                        <span className="font-bold text-slate-400 uppercase text-[9px] block">
+                          2. Conflict Test
+                        </span>
+                        <span className="font-semibold text-slate-800 line-clamp-1">
+                          {journey.expectedHighlight.hasConflict 
+                            ? journey.expectedHighlight.conflictDescription?.split('(')[0] || 'Conflict Detected'
+                            : 'Zero Conflict Synergy'}
+                        </span>
+                      </div>
 
-                      <p className="text-xs text-slate-500 line-clamp-2">
-                        {demo.shortSummary}
-                      </p>
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                        <span className="font-bold text-slate-400 uppercase text-[9px] block">
+                          3. Document Readiness Gap
+                        </span>
+                        <span className="font-semibold text-amber-800 line-clamp-1">
+                          Missing: {journey.expectedHighlight.missingDocumentName}
+                        </span>
+                      </div>
                     </div>
-
-                    <div className="shrink-0 self-center text-slate-400 group-hover:text-blue-700 group-hover:translate-x-1 transition-all">
-                      <ArrowRight className="w-5 h-5" />
-                    </div>
-                  </motion.button>
+                  </motion.div>
                 );
               })}
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <span className="italic">Data tagged: Prototype / Demonstration Personas</span>
+              <span className="italic">All outputs labeled: Prototype · Demonstration Data</span>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
                 className="text-slate-600 hover:text-slate-900 font-medium cursor-pointer"
               >
-                Cancel
+                Close Window
               </motion.button>
             </div>
           </motion.div>

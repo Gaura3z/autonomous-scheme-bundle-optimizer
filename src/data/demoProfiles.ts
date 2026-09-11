@@ -35,13 +35,14 @@ export const DEMO_PROFILES: DemoCitizenProfile[] = [
       pursuingApprenticeship: false,
       hasGirlChildUnder10: false
     },
-    // Has Aadhaar, Bank passbook, Bonafide, Domicile, Caste; but missing Income Certificate!
+    // Has Aadhaar, Bank passbook, Bonafide, Domicile, Caste, Marksheet; but missing Income Certificate!
     initialDeclaredDocuments: [
       'aadhaar',
       'bank_passbook',
       'student_id_bonafide',
       'domicile_certificate',
-      'caste_certificate'
+      'caste_certificate',
+      'educational_marksheet'
     ]
   },
   {
@@ -112,11 +113,11 @@ export const DEMO_PROFILES: DemoCitizenProfile[] = [
       pursuingApprenticeship: false,
       hasGirlChildUnder10: false
     },
-    // Has Aadhaar, Bank Passbook, Land 7/12 extract; Missing Ration Card renewal
+    // Has Aadhaar, Bank Passbook, Ration Card; Missing Agricultural Land 7/12 extract
     initialDeclaredDocuments: [
       'aadhaar',
       'bank_passbook',
-      'land_records_7_12'
+      'ration_card'
     ]
   }
 ];
