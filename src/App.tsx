@@ -15,10 +15,12 @@ import { generateApplicationRoadmap } from './engine/roadmap';
 
 // Layout Components
 import { Navbar } from './components/layout/Navbar';
+import { DemoBanner } from './components/layout/DemoBanner';
 import { Footer } from './components/layout/Footer';
 import { ProgressBar } from './components/layout/ProgressBar';
 import { HowItWorksModal } from './components/layout/HowItWorksModal';
 import { DemoProfileModal } from './components/layout/DemoProfileModal';
+import { ArchitectureModal } from './components/layout/ArchitectureModal';
 
 // Stage Components
 import { LandingPage } from './components/stages/LandingPage';
@@ -62,15 +64,24 @@ const DEFAULT_PROFILE: CitizenProfile = {
 
 export default function App() {
   const [stage, setStage] = useState<AssessmentStage>('LANDING');
+  const [activeDemoId, setActiveDemoId] = useState<string | null>(null);
   const [profile, setProfile] = useState<CitizenProfile>(DEFAULT_PROFILE);
   const [declaredDocumentIds, setDeclaredDocumentIds] = useState<string[]>([
-    'doc_aadhaar',
-    'doc_ration_card',
-    'doc_bank_passbook'
+    'aadhaar',
+    'ration_card',
+    'bank_passbook'
   ]);
 
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
   const [isDemoSelectorOpen, setIsDemoSelectorOpen] = useState(false);
+  const [isArchitectureOpen, setIsArchitectureOpen] = useState(false);
+
+  // Global listener to trigger architecture modal from anywhere
+  useEffect(() => {
+    const handler = () => setIsArchitectureOpen(true);
+    window.addEventListener('open-architecture-modal', handler);
+    return () => window.removeEventListener('open-architecture-modal', handler);
+  }, []);
 
   // Smooth scroll to top whenever the stage changes
   useEffect(() => {
@@ -86,6 +97,7 @@ export default function App() {
 
   // Demo Profile loader
   const handleSelectDemoProfile = (demo: DemoCitizenProfile) => {
+    setActiveDemoId(demo.id);
     setProfile(demo.profile);
     setDeclaredDocumentIds(demo.initialDeclaredDocuments);
     setStage('CANDIDATE_MATCH');
@@ -93,8 +105,9 @@ export default function App() {
 
   // Reset entire assessment
   const handleReset = () => {
+    setActiveDemoId(null);
     setProfile(DEFAULT_PROFILE);
-    setDeclaredDocumentIds(['doc_aadhaar', 'doc_ration_card', 'doc_bank_passbook']);
+    setDeclaredDocumentIds(['aadhaar', 'ration_card', 'bank_passbook']);
     setStage('LANDING');
   };
 
@@ -167,10 +180,19 @@ export default function App() {
       {/* Universal Civic Navbar */}
       <Navbar
         currentStage={stage}
-        onOpenHowItWorks={() => setIsHowItWorksOpen(false || true)}
+        onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
         onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
+        onOpenArchitecture={() => setIsArchitectureOpen(true)}
         onReset={handleReset}
         onGoHome={() => setStage('LANDING')}
+      />
+
+      {/* Demo Persona & Judge Evaluation Controller (Active in Demo Mode) */}
+      <DemoBanner
+        activeDemoId={activeDemoId}
+        onSelectProfile={handleSelectDemoProfile}
+        onExitDemo={() => setActiveDemoId(null)}
+        onOpenArchitecture={() => setIsArchitectureOpen(true)}
       />
 
       {/* Responsive Progress Stepper (hidden on landing and print) */}
@@ -196,6 +218,8 @@ export default function App() {
                 onStartAssessment={() => setStage('PROFILE')}
                 onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
                 onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
+                onOpenArchitecture={() => setIsArchitectureOpen(true)}
+                onSelectDemoProfile={handleSelectDemoProfile}
               />
             )}
 
@@ -313,6 +337,11 @@ export default function App() {
         onClose={() => setIsHowItWorksOpen(false)}
       />
 
+      <ArchitectureModal
+        isOpen={isArchitectureOpen}
+        onClose={() => setIsArchitectureOpen(false)}
+      />
+
       <DemoProfileModal
         isOpen={isDemoSelectorOpen}
         onClose={() => setIsDemoSelectorOpen(false)}
@@ -323,6 +352,7 @@ export default function App() {
       <Footer
         onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
         onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
+        onOpenArchitecture={() => setIsArchitectureOpen(true)}
       />
     </div>
   );

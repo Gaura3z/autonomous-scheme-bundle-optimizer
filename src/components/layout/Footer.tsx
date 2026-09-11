@@ -18,11 +18,13 @@ import {
 interface FooterProps {
   onOpenHowItWorks: () => void;
   onOpenDemoSelector: () => void;
+  onOpenArchitecture?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenHowItWorks,
-  onOpenDemoSelector
+  onOpenDemoSelector,
+  onOpenArchitecture
 }) => {
   return (
     <footer className="bg-slate-900 text-slate-300 text-xs border-t border-slate-800 print:hidden">
@@ -140,6 +142,15 @@ export const Footer: React.FC<FooterProps> = ({
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Ministry Gazette Knowledge Base
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={onOpenArchitecture || onOpenHowItWorks}
+                  className="hover:text-blue-300 text-blue-400 flex items-center gap-1 font-semibold transition-colors cursor-pointer"
+                >
+                  <Layers className="w-3 h-3" />
+                  Fixed Tech Stack & Architecture
                 </button>
               </li>
               <li>

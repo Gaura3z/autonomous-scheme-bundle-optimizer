@@ -17,7 +17,9 @@ import {
   CheckCircle2,
   ExternalLink,
   ArrowRight,
-  Users
+  Users,
+  Cpu,
+  Workflow
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AssessmentStage } from '../../types';
@@ -27,6 +29,7 @@ interface NavbarProps {
   onReset: () => void;
   onOpenHowItWorks: () => void;
   onOpenDemoSelector: () => void;
+  onOpenArchitecture?: () => void;
   onGoHome?: () => void;
 }
 
@@ -35,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onReset,
   onOpenHowItWorks,
   onOpenDemoSelector,
+  onOpenArchitecture,
   onGoHome
 }) => {
   const handleHomeClick = onGoHome || onReset;
@@ -218,6 +222,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">{lang === 'EN' ? 'English' : 'हिन्दी'}</span>
             </button>
 
+            {/* System Architecture Button */}
+            <button
+              onClick={onOpenArchitecture || onOpenHowItWorks}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-900 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              title="Fixed Tech Stack & System Architecture"
+            >
+              <Cpu className="w-3.5 h-3.5 text-blue-700" />
+              <span>Architecture</span>
+            </button>
+
             {/* Theme Toggle Button */}
             <button
               onClick={() => {}}
@@ -231,7 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenHowItWorks}
               className="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
-              title="Screen Reader & Accessibility Options"
+              title="Decision Framework Explanation"
             >
               <Users className="w-4 h-4" />
             </button>
@@ -239,10 +253,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* 4. Sub-Navigation Bar (Home, Categories, Central, State) */}
+      {/* 4. Sub-Navigation Bar (Home, Categories, Central, State, Architecture) */}
       <div className="bg-slate-50 border-t border-slate-200 px-4 sm:px-6 lg:px-8 hidden md:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs font-semibold text-slate-700 py-2">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
             <button 
               onClick={handleHomeClick} 
               className={`hover:text-blue-800 transition-colors cursor-pointer ${isLanding ? 'text-blue-800 font-bold border-b-2 border-blue-800 pb-0.5' : ''}`}
@@ -256,22 +270,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               Find Schemes <span className="text-[10px] px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-full font-bold">New</span>
             </button>
             <button 
-              onClick={onOpenHowItWorks} 
-              className="hover:text-blue-800 transition-colors cursor-pointer"
+              onClick={onOpenArchitecture || onOpenHowItWorks} 
+              className="hover:text-blue-900 transition-colors cursor-pointer flex items-center gap-1.5 text-blue-900 font-bold bg-blue-100/60 px-2 py-0.5 rounded border border-blue-200"
             >
-              Scheme Categories
+              <Workflow className="w-3.5 h-3.5 text-blue-700" />
+              <span>Tech Stack & Architecture</span>
             </button>
             <button 
               onClick={onOpenHowItWorks} 
               className="hover:text-blue-800 transition-colors cursor-pointer"
             >
-              Central Ministries
+              Decision Framework
             </button>
             <button 
               onClick={onOpenHowItWorks} 
               className="hover:text-blue-800 transition-colors cursor-pointer"
             >
-              States & UTs
+              Categories & Ministries
             </button>
           </div>
 

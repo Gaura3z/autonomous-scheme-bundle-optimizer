@@ -121,7 +121,19 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
               </ol>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <button
+                onClick={() => {
+                  onClose();
+                  // Trigger architecture modal if event provided
+                  window.dispatchEvent(new CustomEvent('open-architecture-modal'));
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-800 hover:text-blue-900 bg-blue-50 px-3 py-2 rounded-xl border border-blue-200 cursor-pointer"
+              >
+                <Cpu className="w-3.5 h-3.5" />
+                <span>View Full Architecture & Tech Stack</span>
+              </button>
+
               <motion.button
                 onClick={onClose}
                 whileHover={{ scale: 1.03 }}
