@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { SchemeEvaluation, EligibilityStatus } from '../../types';
+import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
 
 interface EligibilityResultsProps {
   evaluations: SchemeEvaluation[];
@@ -172,6 +173,7 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
                     <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
                       {ev.scheme.category}
                     </span>
+                    <SchemeJurisdictionBadge jurisdiction={ev.scheme.jurisdiction} showStateText={false} />
                     <span className="text-slate-300">•</span>
 
                     {isEligible && (

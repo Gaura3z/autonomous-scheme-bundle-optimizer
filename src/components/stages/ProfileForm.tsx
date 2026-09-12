@@ -747,44 +747,6 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   })}
                 </div>
 
-                {profile.employmentStatus === 'Employed' && (
-                  <div className="mt-5">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <label className="text-xs font-bold text-slate-700">
-                        Job / Occupation
-                        <input
-                          type="text"
-                          value={profile.employmentRole || ''}
-                          onChange={(event) => onChangeProfile({ employmentRole: event.target.value, occupation: event.target.value })}
-                          placeholder="Example: Office assistant, engineer, nurse"
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
-                        />
-                      </label>
-                      <label className="text-xs font-bold text-slate-700">
-                        Organization / Company (optional)
-                        <input
-                          type="text"
-                          value={profile.employerName || ''}
-                          onChange={(event) => onChangeProfile({ employerName: event.target.value })}
-                          placeholder="Company or organization name"
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
-                        />
-                      </label>
-                      <label className="text-xs font-bold text-slate-700 sm:col-span-2">
-                        Monthly Employment Income (optional)
-                        <input
-                          type="number"
-                          min="0"
-                          value={profile.employmentMonthlyIncome ?? ''}
-                          onChange={(event) => onChangeProfile({ employmentMonthlyIncome: event.target.value === '' ? undefined : Number(event.target.value) })}
-                          placeholder="Enter amount in rupees"
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                )}
-
                 {profile.employmentStatus === 'Self-Employed' && (
                   <div className="mt-5 space-y-3 rounded-2xl border border-blue-200 bg-blue-50/40 p-4">
                     <label className="block text-xs font-bold text-slate-700">

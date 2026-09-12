@@ -19,6 +19,7 @@ import {
   Printer
 } from 'lucide-react';
 import { DocumentReadiness, Scheme, DocumentInfo } from '../../types';
+import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
 import { createDocumentReadinessPdf } from '../../services/documentReadinessPdf';
 
 interface DocumentReadinessProps {
@@ -159,6 +160,7 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
                     <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
                       {scheme.category}
                     </span>
+                    <SchemeJurisdictionBadge jurisdiction={scheme.jurisdiction} showStateText={false} />
                     <span className="text-slate-300 print:hidden">•</span>
                     <span className="text-xs font-bold text-emerald-700 print:text-black">
                       ✓ Instant Online Filing Possible

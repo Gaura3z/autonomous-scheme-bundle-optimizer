@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Scheme, CitizenProfile } from '../../types';
+import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
 
 interface InitialMatchingProps {
   candidates: Scheme[];
@@ -81,13 +82,7 @@ export const InitialMatching: React.FC<InitialMatchingProps> = ({
                   {scheme.category}
                 </span>
 
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
-                  scheme.jurisdiction === 'Central'
-                    ? 'bg-blue-50 text-blue-800 border border-blue-200'
-                    : 'bg-purple-50 text-purple-800 border border-purple-200'
-                }`}>
-                  {scheme.jurisdiction} Scheme
-                </span>
+                <SchemeJurisdictionBadge jurisdiction={scheme.jurisdiction} />
               </div>
 
               {/* Title & Tagline */}

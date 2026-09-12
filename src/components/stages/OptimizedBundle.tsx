@@ -21,6 +21,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { OptimizedBundle, Scheme } from '../../types';
+import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
 import { getBundleValidity } from '../../engine/validity';
 
 interface OptimizedBundleProps {
@@ -222,6 +223,7 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
                       <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
                         {scheme.category}
                       </span>
+                      <SchemeJurisdictionBadge jurisdiction={scheme.jurisdiction} showStateText={false} />
                       <span className="text-slate-300">•</span>
                       <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
                         Compatible
