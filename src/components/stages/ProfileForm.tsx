@@ -144,18 +144,18 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [activeInfo, setActiveInfo] = useState<InfoItem | null>(null);
   const [validationMessage, setValidationMessage] = useState('');
-  const totalSteps = 5;
+  const totalSteps = 7;
 
   const validateStep = () => {
     if (currentStep === 1 && (!profile.gender || profile.age < 15 || profile.age > 120)) return 'Please choose a gender and a valid age between 15 and 120.';
     if (currentStep === 2 && (!profile.state || !profile.areaType)) return 'Please select your state and area of residence.';
     if (currentStep === 3 && !profile.socialCategory) return 'Please select your social category.';
     if (currentStep === 4 && profile.hasDisability && (!profile.disabilityPercentage || profile.disabilityPercentage < 1 || profile.disabilityPercentage > 100)) return 'Please select a valid certified disability percentage.';
-    if (currentStep === 5 && !['Student', 'Employed', 'Self-Employed'].includes(profile.employmentStatus)) return 'Please select Student, Employment, or Self-Employment.';
-    if (currentStep === 5 && profile.employmentStatus === 'Self-Employed' && !profile.selfEmploymentCategory) return 'Please select a self-employment category.';
-    if (currentStep === 5 && profile.employmentStatus === 'Self-Employed' && !profile.selfEmploymentDetails?.trim()) return 'Please add a short description of your self-employment work.';
-    if (currentStep === 5 && profile.employmentStatus === 'Self-Employed' && (profile.selfEmploymentMonthlyIncome === undefined || profile.selfEmploymentMonthlyIncome < 0)) return 'Please enter your monthly self-employment income.';
-    if (currentStep === 5 && profile.annualFamilyIncome < 0) return 'Please provide a valid annual income.';
+    if (currentStep === 7 && !['Student', 'Employed', 'Self-Employed'].includes(profile.employmentStatus)) return 'Please select Student, Employment, or Self-Employment.';
+    if (currentStep === 7 && profile.employmentStatus === 'Self-Employed' && !profile.selfEmploymentCategory) return 'Please select a self-employment category.';
+    if (currentStep === 7 && profile.employmentStatus === 'Self-Employed' && !profile.selfEmploymentDetails?.trim()) return 'Please add a short description of your self-employment work.';
+    if (currentStep === 7 && profile.employmentStatus === 'Self-Employed' && (profile.selfEmploymentMonthlyIncome === undefined || profile.selfEmploymentMonthlyIncome < 0)) return 'Please enter your monthly self-employment income.';
+    if (currentStep === 7 && profile.annualFamilyIncome < 0) return 'Please provide a valid annual income.';
     return '';
   };
 
@@ -212,7 +212,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             {/* Progress Dots Component */}
             <div className="flex items-center gap-1 sm:gap-2">
-              {[1, 2, 3, 4, 5].map((stepIdx) => {
+              {Array.from({ length: totalSteps }, (_, index) => index + 1).map((stepIdx) => {
                 const isCompleted = stepIdx < currentStep;
                 const isActive = stepIdx === currentStep;
 
@@ -600,7 +600,14 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 </motion.div>
               )}
 
-              <div className="pt-2 border-t border-slate-100">
+              {/* Minority and marital status are separate steps on mobile and desktop. */}
+            </motion.div>
+          )}
+
+          {/* STEP 5: MINORITY COMMUNITY */}
+          {currentStep === 5 && (
+            <motion.div key="step-5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="space-y-6">
+              <div>
                 <div className="flex items-center gap-2 mb-3">
                   <label className="text-sm sm:text-base font-bold text-slate-900">
                     <span className="text-rose-500 mr-1">*</span>
@@ -645,9 +652,14 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   This helps identify schemes that specifically support notified minority communities.
                 </p>
               </div>
+            </motion.div>
+          )}
 
+          {/* STEP 6: MARITAL STATUS */}
+          {currentStep === 6 && (
+            <motion.div key="step-6" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="space-y-6">
               {profile.gender === 'Female' && (
-                <div className="pt-2 border-t border-slate-100">
+                <div>
                   <label className="block text-sm sm:text-base font-bold text-slate-900 mb-3">
                     What is your marital status?
                   </label>
@@ -672,13 +684,18 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   </p>
                 </div>
               )}
+              {profile.gender !== 'Female' && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm text-slate-600">
+                  Marital status is not needed for this profile. Continue to the next step.
+                </div>
+              )}
             </motion.div>
           )}
 
-          {/* STEP 5: LIVELIHOOD, INCOME & HOUSEHOLD */}
-          {currentStep === 5 && (
+          {/* STEP 7: LIVELIHOOD, INCOME & HOUSEHOLD */}
+          {currentStep === 7 && (
             <motion.div
-              key="step-5"
+              key="step-7"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
