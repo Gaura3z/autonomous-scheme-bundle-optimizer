@@ -875,7 +875,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   type="range"
                   min={30000}
                   max={1200000}
-                  step={10000}
+                  step={5000}
                   value={profile.annualFamilyIncome}
                   onChange={(e) => onChangeProfile({ annualFamilyIncome: parseInt(e.target.value) })}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
