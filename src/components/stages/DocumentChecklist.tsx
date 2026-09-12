@@ -16,7 +16,7 @@ import {
   Clock
 } from 'lucide-react';
 import { DocumentInfo, Scheme } from '../../types';
-import { MASTER_DOCUMENTS } from '../../data/documents';
+import { planDocumentRequests } from '../../engine/documents';
 
 interface DocumentChecklistProps {
   bundleSchemes: Scheme[];
@@ -37,26 +37,15 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
   onProceedToReadiness,
   onBackToBundle
 }) => {
-  // Extract all unique documents required by the optimized bundle
-  const requiredDocIds: string[] = Array.from(
-    new Set<string>(bundleSchemes.flatMap((s) => s.requiredDocumentIds))
-  );
+  const documentRequests = planDocumentRequests(bundleSchemes, declaredDocumentIds);
+  const requiredDocIds = documentRequests.map((request) => request.document.id);
 
   const declaredSet = new Set(declaredDocumentIds);
 
-  // Group by category
+  // Group only documents connected to the current eligible scheme set.
   const docsByCategory: Record<string, DocumentInfo[]> = {};
-  for (const id of requiredDocIds) {
-    const doc: DocumentInfo = MASTER_DOCUMENTS[id] || {
-      id,
-      name: id,
-      category: 'Identity',
-      issuingAuthority: 'Government Office',
-      description: 'Required official proof.',
-      typicalProcessingDays: 7,
-      isImmediateDigital: false,
-      prerequisites: []
-    };
+  for (const request of documentRequests) {
+    const doc = request.document;
 
     if (!docsByCategory[doc.category]) {
       docsByCategory[doc.category] = [];
@@ -90,7 +79,7 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
       {/* Select All / Clear Quick Bar */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
         <span className="text-xs font-semibold text-slate-700">
-          Selected: <strong className="text-blue-900">{declaredDocumentIds.length}</strong> of {requiredDocIds.length} documents
+          Selected: <strong className="text-blue-900">{declaredDocumentIds.filter((id) => requiredDocIds.includes(id)).length}</strong> of {requiredDocIds.length} relevant documents
         </span>
 
         <div className="flex items-center gap-3">
@@ -128,6 +117,10 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
                   <div
                     key={doc.id}
                     onClick={() => onToggleDocument(doc.id)}
+                    role="checkbox"
+                    aria-checked={isChecked}
+                    tabIndex={0}
+                    onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onToggleDocument(doc.id); } }}
                     className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-3.5 ${
                       isChecked
                         ? 'border-emerald-400 bg-emerald-50/40'
@@ -155,6 +148,10 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
 
                       <p className="text-xs text-slate-600 leading-relaxed mb-1">
                         {doc.description}
+                      </p>
+
+                      <p className="text-[11px] font-semibold text-blue-800">
+                        Unlocks: {documentRequests.find((request) => request.document.id === doc.id)?.requiredBy.map((scheme) => scheme.shortName).join(', ')}
                       </p>
 
                       <span className="text-[11px] text-slate-400 block">

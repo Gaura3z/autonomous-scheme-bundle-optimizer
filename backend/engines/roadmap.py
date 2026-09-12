@@ -44,13 +44,16 @@ def generate_roadmap(
 
     # Phase 3: High-Yield Application Submissions
     for s in bundle_schemes:
+        deadline_note = f" Apply by {s.applicationDeadline}; verify the official portal for the current window." if s.applicationDeadline else " Verify the official portal for the current application window."
         steps.append(RoadmapStep(
             step_number=step_counter,
             title=f"Submit Online Application for {s.shortName}",
             phase="Application Filing",
             estimated_timeline="Immediate (1 Day)",
-            description=f"Submit registration for {s.name} ({s.benefit.displayAmount}) on the official ministry portal.",
-            action_url=s.officialSourceUrl
+            description=f"Submit registration for {s.name} ({s.benefit.displayAmount}) on the official ministry portal.{deadline_note}",
+            action_url=s.officialSourceUrl,
+            application_deadline=s.applicationDeadline,
+            validity_note=s.validityNote
         ))
         step_counter += 1
 

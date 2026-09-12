@@ -101,6 +101,8 @@ export function generateApplicationRoadmap(
       title: `Submit Online Application for ${scheme.name}`,
       description: `All required documents are ready. File online at ${scheme.ministry} portal. ${scheme.applicationSteps[0]?.instructions || ''}`,
       targetScheme: scheme,
+      applicationDeadline: scheme.applicationDeadline,
+      validityNote: scheme.validityNote,
       estimatedTimeline: 'Immediate (All documents ready)',
       actionUrl: scheme.officialSourceUrl,
       isCompleted: false
@@ -117,6 +119,8 @@ export function generateApplicationRoadmap(
       title: `Submit Application for ${item.scheme.name}`,
       description: `Eligible! Complete submission once ${missingNames} is issued. Benefit: ${item.scheme.benefit.displayAmount}.`,
       targetScheme: item.scheme,
+      applicationDeadline: item.scheme.applicationDeadline,
+      validityNote: item.scheme.validityNote,
       estimatedTimeline: 'After document issuance',
       actionUrl: item.scheme.officialSourceUrl,
       isCompleted: false,

@@ -1,10 +1,10 @@
 /**
- * Page 1: Authentic myScheme Portal Landing Experience
- * Directly modeled from official myScheme design (Screenshots 1 & 2):
+ * Page 1: SchemeWise Portal Landing Experience
+ * Inspired by official citizen-service design patterns (Screenshots 1 & 2):
  * - Hero carousel with phone mockup, sector badges (Health, Education, Agriculture, Housing) & QR scanner
  * - #GOVERNMENTSCHEMES / #SCHEMESFORYOU hashtag header
  * - Prominent "Find Schemes For You ->" action
- * - 3 Mint-Green Scheme Metric Cards (4,770+ Total, 710+ Central, 4,050+ State/UTs)
+ * - 3 Mint-Green Scheme Metric Cards showing the current verified project catalog
  * - 3 Interactive Tabs: Categories | States/UTs | Central Ministries
  * - Illustrated Category Grid
  * - Floating interactive SchemeBot AI Mascot (as seen in Screenshot 2 bottom-right)
@@ -58,6 +58,7 @@ import { CitizenProfile, DemoCitizenProfile } from '../../types';
 import { DEMO_PROFILES } from '../../data/demoProfiles';
 import { DEMO_JOURNEYS } from '../../data/demoJourneys';
 import { TECH_STACK_DATA } from '../layout/ArchitectureModal';
+import { MASTER_SCHEMES } from '../../data/schemes';
 
 interface LandingPageProps {
   profile?: CitizenProfile;
@@ -67,10 +68,18 @@ interface LandingPageProps {
   onOpenDemoSelector: () => void;
   onSelectDemoProfile?: (demo: DemoCitizenProfile) => void;
   onOpenArchitecture?: () => void;
+  hasSavedDraft?: boolean;
+  onContinueDraft?: () => void;
 }
 
+const CATALOG_COUNTS = {
+  total: MASTER_SCHEMES.length,
+  central: MASTER_SCHEMES.filter((scheme) => scheme.jurisdiction === 'Central').length,
+  stateOrUt: MASTER_SCHEMES.filter((scheme) => scheme.jurisdiction !== 'Central').length
+};
+
 // 12 Official Categories with clean counts
-const MYSCHEME_CATEGORIES = [
+const SCHEMEWISE_CATEGORIES = [
   { id: 'agriculture', title: 'Agriculture, Rural & Environment', count: '480+ Schemes', icon: Sprout, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
   { id: 'banking', title: 'Banking, Financial Services & Insurance', count: '210+ Schemes', icon: Landmark, color: 'text-blue-700 bg-blue-50 border-blue-200' },
   { id: 'business', title: 'Business & Entrepreneurship', count: '340+ Schemes', icon: Briefcase, color: 'text-amber-700 bg-amber-50 border-amber-200' },
@@ -172,7 +181,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenHowItWorks,
   onOpenDemoSelector,
   onSelectDemoProfile,
-  onOpenArchitecture
+  onOpenArchitecture,
+  hasSavedDraft = false,
+  onContinueDraft
 }) => {
   // Tab switcher state: 'Categories' | 'States' | 'Ministries'
   const [activeTab, setActiveTab] = useState<'Categories' | 'States' | 'Ministries'>('Categories');
@@ -194,7 +205,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
     // Instant intelligent simulated response
     setTimeout(() => {
-      let reply = "Based on your criteria, our Autonomous Rule Engine will evaluate 4,770+ central and state schemes without document uploads. Click 'Find Schemes For You' to start!";
+      let reply = `Based on your criteria, our Autonomous Rule Engine will evaluate ${CATALOG_COUNTS.total} verified project schemes without document uploads. Click 'Find Schemes For You' to start!`;
       const lower = userText.toLowerCase();
       if (lower.includes('farmer') || lower.includes('kisan') || lower.includes('crop') || lower.includes('land')) {
         reply = "For farmers, schemes like PM-KISAN (₹6,000/yr), PM Fasal Bima Yojana, and Sub-Mission on Agricultural Mechanization are available! Let's check your landholding eligibility.";
@@ -244,10 +255,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="flex items-baseline">
                     <span className="text-3xl sm:text-4xl font-black text-emerald-600 tracking-tight">
-                      my
+                      Scheme
                     </span>
                     <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                      Scheme
+                      Wise
                     </span>
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ml-0.5 mb-2 inline-block" />
                   </div>
@@ -296,6 +307,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </motion.button>
+
+                {hasSavedDraft && onContinueDraft && <button type="button" onClick={onContinueDraft} className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-5 py-3.5 text-sm font-bold text-blue-900 hover:bg-blue-100">
+                  Continue saved assessment <ArrowRight className="h-4 w-4" />
+                </button>}
 
               </motion.div>
             </div>
@@ -378,9 +393,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-1.5">
                       <div className="w-6 h-6 rounded-lg bg-emerald-600 flex items-center justify-center text-white text-[10px] font-bold">
-                        mS
+                        SW
                       </div>
-                      <span className="text-xs font-extrabold text-slate-900">myScheme</span>
+                      <span className="text-xs font-extrabold text-slate-900">SchemeWise</span>
                     </div>
                     <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -519,10 +534,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="p-8 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 shadow-2xs hover:shadow-md transition-all cursor-pointer text-center group"
           >
             <span className="text-4xl sm:text-5xl font-black text-slate-900 block tracking-tight group-hover:text-emerald-800 transition-colors">
-              4770+
+              {CATALOG_COUNTS.total}
             </span>
             <span className="mt-2 text-sm font-bold text-slate-700 inline-flex items-center gap-1">
-              Total Schemes <ArrowRight className="w-3.5 h-3.5 text-emerald-700 group-hover:translate-x-1 transition-transform" />
+              Total Schemes in Catalog <ArrowRight className="w-3.5 h-3.5 text-emerald-700 group-hover:translate-x-1 transition-transform" />
             </span>
           </motion.div>
 
@@ -533,7 +548,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="p-8 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 shadow-2xs hover:shadow-md transition-all cursor-pointer text-center group"
           >
             <span className="text-4xl sm:text-5xl font-black text-slate-900 block tracking-tight group-hover:text-emerald-800 transition-colors">
-              710+
+              {CATALOG_COUNTS.central}
             </span>
             <span className="mt-2 text-sm font-bold text-slate-700 inline-flex items-center gap-1">
               Central Schemes <ArrowRight className="w-3.5 h-3.5 text-emerald-700 group-hover:translate-x-1 transition-transform" />
@@ -547,10 +562,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="p-8 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 shadow-2xs hover:shadow-md transition-all cursor-pointer text-center group"
           >
             <span className="text-4xl sm:text-5xl font-black text-slate-900 block tracking-tight group-hover:text-emerald-800 transition-colors">
-              4050+
+              {CATALOG_COUNTS.stateOrUt}
             </span>
             <span className="mt-2 text-sm font-bold text-slate-700 inline-flex items-center gap-1">
-              States/UTs Schemes <ArrowRight className="w-3.5 h-3.5 text-emerald-700 group-hover:translate-x-1 transition-transform" />
+              State/UT Schemes <ArrowRight className="w-3.5 h-3.5 text-emerald-700 group-hover:translate-x-1 transition-transform" />
             </span>
           </motion.div>
         </div>
@@ -608,7 +623,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* TAB 1: 12 CATEGORIES GRID (Illustrated Icons as in Screenshot 2) */}
         {activeTab === 'Categories' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
-            {MYSCHEME_CATEGORIES.map((cat) => {
+            {SCHEMEWISE_CATEGORIES.map((cat) => {
               const IconComp = cat.icon;
               return (
                 <motion.button
@@ -689,7 +704,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         )}
       </section>
 
-      {/* 3. HOW MYSCHEME WORKS (The 3-Step Clear Citizen Flow) */}
+      {/* 3. HOW SCHEMEWISE WORKS (The 3-Step Clear Citizen Flow) */}
       <section className="bg-slate-50 py-14 sm:py-18 px-4 sm:px-6 lg:px-8 border-y border-slate-200">
         <div className="max-w-6xl mx-auto text-center">
           <div className="mb-12">
@@ -697,7 +712,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Easy 3-Step Process
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-3">
-              How myScheme Autonomous Optimizer Works
+              How SchemeWise Autonomous Optimizer Works
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl mx-auto">
               Skip endless manual portal searches and avoid application rejections caused by clawback rules.
@@ -1071,7 +1086,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             onClick={onStartAssessment}
             className="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1 cursor-pointer"
           >
-            Explore All 4,770+ Schemes <ArrowRight className="w-3.5 h-3.5" />
+            Explore All {CATALOG_COUNTS.total} Schemes <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 

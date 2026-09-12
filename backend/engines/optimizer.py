@@ -18,7 +18,8 @@ from ..models import Scheme, OptimizedBundle
 def optimize_bundle(
     eligible_schemes: List[Scheme],
     conflict_map: Dict[str, set],
-    declared_doc_ids: List[str] | None = None
+    declared_doc_ids: List[str] | None = None,
+    ready_scheme_ids: List[str] | None = None,
 ) -> OptimizedBundle:
     start_time = time.time()
 
@@ -74,10 +75,14 @@ def optimize_bundle(
         return result_ids
 
     potential_ids = solve(eligible_schemes)
-    ready_candidates = [
-        s for s in eligible_schemes
-        if declared_doc_ids is None or all(doc in declared for doc in s.requiredDocuments)
-    ]
+    ready_ids = set(ready_scheme_ids) if ready_scheme_ids is not None else None
+    ready_candidates = [s for s in eligible_schemes if (
+        ready_ids is not None
+        and s.id in ready_ids
+    ) or (
+        ready_ids is None
+        and (declared_doc_ids is None or all(doc in declared for doc in s.requiredDocuments))
+    )]
     selected_ids = solve(ready_candidates)
 
     selected_schemes = [s for s in eligible_schemes if s.id in selected_ids]

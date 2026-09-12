@@ -12,10 +12,18 @@ class CitizenProfile(BaseModel):
     socialCategory: str = Field(..., description="'General', 'OBC', 'SC', 'ST', 'EWS'")
     annualFamilyIncome: float = Field(..., ge=0, description="Annual family income in INR")
     occupationCategory: Optional[str] = Field(None, description="Primary occupation category")
+    employmentStatus: Optional[str] = None
+    employmentRole: Optional[str] = None
+    employerName: Optional[str] = None
+    employmentMonthlyIncome: Optional[float] = Field(None, ge=0)
+    selfEmploymentCategory: Optional[str] = None
+    selfEmploymentDetails: Optional[str] = None
+    selfEmploymentMonthlyIncome: Optional[float] = Field(None, ge=0)
     landHoldingAcres: Optional[float] = Field(0.0, ge=0, description="Agricultural land ownership in acres")
     isStudent: Optional[bool] = False
     isDisability: Optional[bool] = False
     disabilityPercentage: Optional[int] = Field(0, ge=0, le=100)
+    isMinority: Optional[bool] = False
     maritalStatus: Optional[str] = "Married"
     residenceType: Optional[str] = "Rural"
     isBPL: Optional[bool] = False
@@ -43,6 +51,12 @@ class Scheme(BaseModel):
     applicableStates: List[str]
     requiredDocuments: List[str]
     officialSourceUrl: str
+    lastVerifiedDate: str = "2026-09-12"
+    kbVersion: str = "v2026.1-PS16"
+    validityStartDate: Optional[str] = None
+    applicationDeadline: Optional[str] = None
+    validityNote: Optional[str] = None
+    sourceStatus: str = "CURATED"
     conflictingSchemeIds: Optional[List[str]] = []
     weight: Optional[float] = 1.0
 
@@ -81,6 +95,21 @@ class RoadmapStep(BaseModel):
     description: str
     critical_dependency: Optional[str] = None
     action_url: Optional[str] = None
+    application_deadline: Optional[str] = None
+    validity_note: Optional[str] = None
+
+class DecisionAudit(BaseModel):
+    catalog_version: str = "v2026.1-PS16"
+    catalog_size: int
+    eligible_count: int
+    excluded_count: int
+    conflict_count: int
+    declared_document_count: int
+    ready_scheme_count: int
+    document_blocked_count: int
+    solver: str
+    execution_time_ms: float
+    trace: List[str] = []
 
 class OptimizationRequest(BaseModel):
     profile: CitizenProfile
@@ -92,6 +121,7 @@ class OptimizationResponse(BaseModel):
     bundle: OptimizedBundle
     readiness: DocumentReadinessResult
     roadmap: List[RoadmapStep]
+    audit: DecisionAudit
     architectural_note: str = (
         "AI does NOT decide eligibility. Deterministic execution: "
         "Rules -> Eligibility -> Exclusions -> Conflicts -> PuLP Optimization -> Documents -> Roadmap."

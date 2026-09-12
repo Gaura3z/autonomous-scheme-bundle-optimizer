@@ -2,7 +2,7 @@
 
 ## 1. Algorithmic Pipeline & Decision Support
 
-The myScheme Autonomous Optimizer uses a multi-tier deterministic pipeline:
+The SchemeWise Autonomous Optimizer uses a multi-tier deterministic pipeline:
 
 ```
 Citizen Demographics + Livelihood Attributes

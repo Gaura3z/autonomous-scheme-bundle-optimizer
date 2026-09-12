@@ -1,11 +1,14 @@
 /**
  * Master Verified Schemes Knowledge Base
- * 14 Source-Backed Active Welfare Schemes (Central & State)
+ * Source-backed active welfare schemes for the PS16 prototype catalog
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
 import { Scheme } from '../types';
+import { ADDITIONAL_SCHEMES } from './additionalSchemes';
 
-export const MASTER_SCHEMES: Scheme[] = [
+export const CATALOG_VERSION = 'v2026.2-PS16';
+
+const CURATED_SCHEMES: Scheme[] = [
   {
     id: 'pm_kisan',
     code: 'PM-KISAN',
@@ -637,5 +640,14 @@ export const MASTER_SCHEMES: Scheme[] = [
         portalUrl: 'https://ddugky.gov.in'
       }
     ]
-  }
+  },
+  ...ADDITIONAL_SCHEMES
 ];
+
+// This is deliberately labelled as a planning window. It is not presented as
+// an official government deadline until an admin verifies and replaces it.
+export const MASTER_SCHEMES: Scheme[] = CURATED_SCHEMES.map((scheme) => ({
+  ...scheme,
+  applicationDeadline: scheme.applicationDeadline ?? '2026-12-31',
+  validityNote: scheme.validityNote ?? 'Demo planning window — verify the official portal before filing.'
+}));

@@ -4,7 +4,7 @@
  * Provides clear human-centered justification for every question.
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   HelpCircle, 
   ArrowLeft, 
@@ -16,60 +16,38 @@ import {
   ShieldQuestion
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CitizenProfile, AdaptiveQuestion } from '../../types';
-import { ADAPTIVE_QUESTIONS } from '../../data/questions';
+import { CitizenProfile, AdaptiveQuestion, Scheme } from '../../types';
+import { planAdaptiveQuestions } from '../../engine/questions';
 
 interface AdaptiveQuestionnaireProps {
   profile: CitizenProfile;
   onChangeProfile: (updated: Partial<CitizenProfile>) => void;
   onComplete: () => void;
   onBack: () => void;
+  candidateSchemes?: Scheme[];
 }
 
 export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
   profile,
   onChangeProfile,
   onComplete,
-  onBack
+  onBack,
+  candidateSchemes = []
 }) => {
-  // Determine relevant questions based on candidate schemes and profile context
+  const [answeredQuestionIds, setAnsweredQuestionIds] = useState<string[]>([]);
+  // Re-plan after every answer. The next question is selected from the
+  // current candidate set, not from a fixed questionnaire length.
   const relevantQuestions = useMemo(() => {
-    return ADAPTIVE_QUESTIONS.filter((q) => {
-      if (q.id === 'q_student_higher_ed') {
-        return profile.isStudent || profile.educationLevel === 'Undergraduate' || profile.educationLevel === 'Postgraduate';
-      }
-      if (q.id === 'q_street_vending') {
-        return profile.areaType !== 'Rural' && (profile.employmentStatus === 'Self-Employed' || profile.employmentStatus === 'Daily Wage Worker') && !profile.isStudent;
-      }
-      if (q.id === 'q_woman_entrepreneur') {
-        return profile.gender === 'Female' && (profile.employmentStatus === 'Self-Employed' || profile.employmentStatus === 'Unemployed');
-      }
-      if (q.id === 'q_apprenticeship') {
-        return profile.age >= 16 && profile.age <= 30 && !profile.isFarmer && profile.employmentStatus !== 'Self-Employed';
-      }
-      if (q.id === 'q_girl_child') {
-        return (profile.gender === 'Female' || profile.maritalStatus === 'Married') && !profile.isStudent && !profile.isFarmer;
-      }
-      if (q.id === 'q_farmer_landholding') {
-        return profile.isFarmer;
-      }
-      if (q.id === 'q_rainfed_land') {
-        return profile.isFarmer;
-      }
-      return true;
-    });
-  }, [profile]);
+    return planAdaptiveQuestions(profile, candidateSchemes, answeredQuestionIds);
+  }, [profile, candidateSchemes, answeredQuestionIds]);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  useEffect(() => {
+    if (relevantQuestions.length === 0) onComplete();
+  }, [relevantQuestions.length, onComplete]);
 
-  // If no specific adaptive questions apply, auto complete
-  if (relevantQuestions.length === 0) {
-    onComplete();
-    return null;
-  }
-
-  const currentQ = relevantQuestions[Math.min(currentIndex, relevantQuestions.length - 1)];
-  const isLastQuestion = currentIndex >= relevantQuestions.length - 1;
+  if (relevantQuestions.length === 0) return null;
+  const currentQ = relevantQuestions[0];
+  const isLastQuestion = relevantQuestions.length === 1;
 
   const currentAnswer = profile[currentQ.field];
 
@@ -78,27 +56,22 @@ export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
   };
 
   const handleNext = () => {
+    setAnsweredQuestionIds((previous) => previous.includes(currentQ.id) ? previous : [...previous, currentQ.id]);
     if (isLastQuestion) {
       onComplete();
-    } else {
-      setCurrentIndex((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1);
-    } else {
-      onBack();
-    }
+    onBack();
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
       {/* Questionnaire Progress */}
       <div className="mb-6 flex items-center justify-between text-xs text-slate-500">
-        <span className="font-semibold text-blue-700 uppercase tracking-wider">
-          Adaptive Question {currentIndex + 1} of {relevantQuestions.length}
+          <span className="font-semibold text-blue-700 uppercase tracking-wider">
+          Decision question · {relevantQuestions.length} remaining
         </span>
         <span className="bg-slate-100 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-600">
           Targeted Follow-up
@@ -109,7 +82,7 @@ export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
         <motion.div 
           className="bg-blue-700 h-full rounded-full"
           initial={false}
-          animate={{ width: `${((currentIndex + 1) / relevantQuestions.length) * 100}%` }}
+          animate={{ width: `${(answeredQuestionIds.length / Math.max(answeredQuestionIds.length + relevantQuestions.length, 1)) * 100}%` }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         />
       </div>
@@ -221,7 +194,7 @@ export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
               whileTap={{ scale: 0.97 }}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-900/20 transition-colors cursor-pointer"
             >
-              <span>{isLastQuestion ? 'Complete Assessment' : 'Next Question'}</span>
+              <span>{isLastQuestion ? 'Complete Assessment' : 'Continue with next relevant question'}</span>
               <ArrowRight className="w-4 h-4" />
             </motion.button>
           </div>

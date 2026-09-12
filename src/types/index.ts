@@ -4,11 +4,27 @@
  */
 
 export type SocialCategory = 'General' | 'OBC' | 'SC' | 'ST' | 'EWS';
+/** More specific subcategories are retained for display while rules use the parent category. */
+export type SocialCategoryDetail = 'PVTG' | 'DNT';
 export type Gender = 'Male' | 'Female' | 'Transgender' | 'Other';
 export type AreaType = 'Rural' | 'Urban' | 'Semi-Urban';
 export type MaritalStatus = 'Single' | 'Married' | 'Widowed' | 'Divorced' | 'Separated';
 export type EducationLevel = 'Below 10th' | '10th Pass' | '12th Pass' | 'Undergraduate' | 'Postgraduate' | 'Diploma' | 'Vocational';
 export type EmploymentStatus = 'Student' | 'Unemployed' | 'Employed' | 'Self-Employed' | 'Farmer' | 'Daily Wage Worker';
+export type SelfEmploymentCategory =
+  | 'Farmer / Agriculture'
+  | 'Business Owner'
+  | 'Shop Owner'
+  | 'Trader'
+  | 'Freelancer'
+  | 'Consultant'
+  | 'Contractor'
+  | 'Driver / Transport'
+  | 'Artisan / Handicraft'
+  | 'Skilled Worker'
+  | 'Teacher / Tutor'
+  | 'Professional Services'
+  | 'Other Self-Employment';
 
 export interface CitizenProfile {
   // Basic Demographics
@@ -17,6 +33,7 @@ export interface CitizenProfile {
   state: string; // e.g., 'MH', 'GJ', 'RJ', 'KA', 'UP', etc.
   areaType: AreaType;
   socialCategory: SocialCategory;
+  socialCategoryDetail?: SocialCategoryDetail;
   maritalStatus: MaritalStatus;
 
   // Education & Work
@@ -24,6 +41,12 @@ export interface CitizenProfile {
   educationLevel: EducationLevel;
   employmentStatus: EmploymentStatus;
   occupation: string;
+  employmentRole?: string;
+  employerName?: string;
+  employmentMonthlyIncome?: number;
+  selfEmploymentCategory?: SelfEmploymentCategory;
+  selfEmploymentDetails?: string;
+  selfEmploymentMonthlyIncome?: number;
 
   // Financial & Household
   annualFamilyIncome: number; // in Rupees
@@ -37,6 +60,7 @@ export interface CitizenProfile {
 
   hasDisability: boolean;
   disabilityPercentage?: number;
+  isMinority?: boolean;
 
   isWomanEntrepreneur: boolean;
   hasStreetVendingActivity: boolean;
@@ -124,6 +148,12 @@ export interface Scheme {
   officialSourceUrl: string;
   lastVerifiedDate: string;
   kbVersion: string;
+  /** Optional official start date for the current scheme window. */
+  validityStartDate?: string;
+  /** Optional last date on which an application may be filed. */
+  applicationDeadline?: string;
+  /** Plain-language note, especially useful for rolling or demo-only dates. */
+  validityNote?: string;
 
   benefit: SchemeBenefit;
   requiredDocumentIds: string[];
@@ -215,6 +245,8 @@ export interface RoadmapStep {
   description: string;
   targetDocument?: DocumentInfo;
   targetScheme?: Scheme;
+  applicationDeadline?: string;
+  validityNote?: string;
   estimatedTimeline: string;
   actionUrl?: string;
   isCompleted: boolean;

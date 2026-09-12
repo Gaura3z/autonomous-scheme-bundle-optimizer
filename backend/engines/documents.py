@@ -14,11 +14,26 @@ DOCUMENT_DEPENDENCIES: Dict[str, List[str]] = {
     "kisan_credit_card": ["aadhaar", "land_712", "bank_passbook"]
 }
 
+# The backend historically used abbreviated document IDs.  Normalize them at
+# the API boundary so the frontend catalog and backend readiness engine agree.
+DOCUMENT_ID_ALIASES = {
+    "income_cert": "income_certificate",
+    "caste_cert": "caste_certificate",
+    "domicile_cert": "domicile_certificate",
+    "land_712": "land_records_7_12",
+    "pan_card": "pan_card",
+    "marksheet": "marksheet",
+}
+
+
+def canonical_document_id(document_id: str) -> str:
+    return DOCUMENT_ID_ALIASES.get(document_id, document_id)
+
 def analyze_document_readiness(
     schemes: List[Scheme],
     declared_doc_ids: List[str]
 ) -> DocumentReadinessResult:
-    declared_set = set(declared_doc_ids)
+    declared_set = {canonical_document_id(document_id) for document_id in declared_doc_ids}
     ready_schemes = []
     missing_docs_by_scheme: Dict[str, List[str]] = {}
 
@@ -26,7 +41,7 @@ def analyze_document_readiness(
     total_satisfied = 0
 
     for s in schemes:
-        req_docs = s.requiredDocuments or []
+        req_docs = [canonical_document_id(document_id) for document_id in (s.requiredDocuments or [])]
         missing = [d for d in req_docs if d not in declared_set]
         total_required += len(req_docs)
         total_satisfied += (len(req_docs) - len(missing))

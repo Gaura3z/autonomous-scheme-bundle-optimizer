@@ -1,5 +1,5 @@
 /**
- * Authentic myScheme Portal Footer (GIGW Compliant)
+ * SchemeWise Portal Footer (GIGW Compliant)
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
 import React from 'react';
@@ -91,8 +91,8 @@ export const Footer: React.FC<FooterProps> = ({
                 <Layers className="w-4 h-4 text-amber-300" />
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-black text-white">my</span>
-                <span className="text-lg font-black text-blue-400">Scheme</span>
+                <span className="text-lg font-black text-white">Scheme</span>
+                <span className="text-lg font-black text-blue-400">Wise</span>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -189,7 +189,7 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>support@myscheme.gov.in</span>
+                <span>SchemeWise support desk</span>
               </div>
               <div className="mt-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-[11px] text-slate-300">
                 <span className="font-semibold text-white block mb-0.5">National Grievance Portal</span>

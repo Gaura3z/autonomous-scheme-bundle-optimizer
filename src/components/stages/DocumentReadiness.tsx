@@ -19,6 +19,7 @@ import {
   Printer
 } from 'lucide-react';
 import { DocumentReadiness, Scheme, DocumentInfo } from '../../types';
+import { createDocumentReadinessPdf } from '../../services/documentReadinessPdf';
 
 interface DocumentReadinessProps {
   readiness: DocumentReadiness;
@@ -32,9 +33,39 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
   onBackToChecklist
 }) => {
   const [selectedDocForGuidance, setSelectedDocForGuidance] = useState<DocumentInfo | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
-  const handlePrint = () => {
-    window.print();
+  const handlePdfExport = async () => {
+    // Reserve a tab while the click still has user activation. This avoids
+    // popup blocking when the generated PDF is opened after the async export.
+    const pdfWindow = window.open('', '_blank');
+    setIsExportingPdf(true);
+
+    try {
+      const pdfBytes = await createDocumentReadinessPdf(readiness);
+      const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      if (pdfWindow && !pdfWindow.closed) {
+        pdfWindow.location.href = pdfUrl;
+      } else {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pdfUrl;
+        downloadLink.download = 'document-readiness-assessment-ps16.pdf';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+      }
+
+      window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 60_000);
+    } catch (error) {
+      pdfWindow?.close();
+      console.error('Unable to create the document readiness PDF', error);
+      // Keep a native print fallback available if a browser blocks PDF export.
+      window.print();
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   return (
@@ -44,7 +75,7 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
         <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
           <div>
             <div className="text-[10pt] font-extrabold uppercase tracking-wider text-slate-800">
-              Government of India • National myScheme Portal
+              SchemeWise Citizen Benefits Portal
             </div>
             <h1 className="text-xl font-black text-slate-900 mt-0.5">
               Document Readiness & Procurement Audit
@@ -78,12 +109,15 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
 
           <div className="print:hidden shrink-0">
             <button
-              onClick={handlePrint}
+              type="button"
+              onClick={handlePdfExport}
+              disabled={isExportingPdf}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
-              title="Print Document Readiness Report"
+              title="Open or download the document readiness PDF"
+              aria-label="Open or download the document readiness assessment as a PDF"
             >
               <Printer className="w-4 h-4 text-emerald-800" />
-              <span>Print / Save PDF</span>
+              <span>{isExportingPdf ? 'Preparing PDF…' : 'Open / Save PDF'}</span>
             </button>
           </div>
         </div>

@@ -7,7 +7,11 @@
 import { Scheme, OptimizedBundle } from '../types';
 import { areSchemesConflicted } from './conflicts';
 
-export function optimizeSchemeBundle(eligibleSchemes: Scheme[], declaredDocumentIds?: string[]): OptimizedBundle {
+export function optimizeSchemeBundle(
+  eligibleSchemes: Scheme[],
+  declaredDocumentIds?: string[],
+  readySchemeIds?: string[]
+): OptimizedBundle {
   if (eligibleSchemes.length === 0) {
     return {
       selectedSchemes: [],
@@ -70,9 +74,12 @@ export function optimizeSchemeBundle(eligibleSchemes: Scheme[], declaredDocument
   };
 
   const potential = selectCompatible(eligibleSchemes);
-  const readyCandidates = declaredDocumentIds === undefined
-    ? eligibleSchemes
-    : eligibleSchemes.filter((scheme) => scheme.requiredDocumentIds.every((id) => declared.has(id)));
+  const readySet = readySchemeIds ? new Set(readySchemeIds) : null;
+  const readyCandidates = readySet
+    ? eligibleSchemes.filter((scheme) => readySet.has(scheme.id))
+    : declaredDocumentIds === undefined
+      ? eligibleSchemes
+      : eligibleSchemes.filter((scheme) => scheme.requiredDocumentIds.every((id) => declared.has(id)));
   const selectedResult = selectCompatible(readyCandidates);
   const selected = selectedResult.selected;
   const rejected = selectedResult.rejected;

@@ -6,6 +6,35 @@
 import { Scheme, DocumentReadiness, DocumentInfo } from '../types';
 import { MASTER_DOCUMENTS } from '../data/documents';
 
+export interface DocumentRequest {
+  document: DocumentInfo;
+  requiredBy: Scheme[];
+  isDeclared: boolean;
+  missingForSchemeIds: string[];
+  priority: number;
+}
+
+/** Plans only the documents required by the current scheme set, deduplicated
+ * and ranked by the number of candidate schemes they can unlock. */
+export function planDocumentRequests(schemes: Scheme[], declaredDocumentIds: string[]): DocumentRequest[] {
+  const declared = new Set(declaredDocumentIds);
+  const byDocument = new Map<string, Scheme[]>();
+  schemes.forEach((scheme) => scheme.requiredDocumentIds.forEach((documentId) => {
+    const requiredBy = byDocument.get(documentId) ?? [];
+    if (!requiredBy.some((item) => item.id === scheme.id)) requiredBy.push(scheme);
+    byDocument.set(documentId, requiredBy);
+  }));
+  return Array.from(byDocument.entries()).map(([documentId, requiredBy]) => ({
+    document: MASTER_DOCUMENTS[documentId] ?? {
+      id: documentId, name: documentId, category: 'Identity', issuingAuthority: 'Government Authority', description: 'Required official proof.', typicalProcessingDays: 7, isImmediateDigital: false, prerequisites: []
+    },
+    requiredBy,
+    isDeclared: declared.has(documentId),
+    missingForSchemeIds: requiredBy.filter((scheme) => !declared.has(documentId)).map((scheme) => scheme.id),
+    priority: requiredBy.length
+  })).sort((left, right) => right.priority - left.priority || left.document.name.localeCompare(right.document.name));
+}
+
 export function evaluateDocumentReadiness(
   schemes: Scheme[],
   declaredDocumentIds: string[]

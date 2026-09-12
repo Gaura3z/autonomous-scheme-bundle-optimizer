@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+/* Keep narrow devices from receiving horizontal overflow from long labels,
+   cards, or animated portal content. */
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Shared keyboard-accessible focus treatment for the citizen and admin flows. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ==========================================================================
    PRINT SPECIFIC CSS STYLES & CIVIC AUDIT EXPORT UTILITIES
    Kurukshetra 2.0 HACKFEST 2026 PS16 - Autonomous Scheme-Bundle Optimizer
@@ -21,6 +53,15 @@
     print-color-adjust: exact !important;
   }
 
+  /* Motion transitions can leave a page at its pre-animation opacity when the
+     browser print preview opens immediately after a button click. */
+  .printable-root,
+  .printable-root * {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+
   /* Unclutter page: hide navigation, headers, footers, interactive buttons, floating widgets */
   header,
   nav,
@@ -37,6 +78,13 @@
 
   /* Keep essential elements visible that might be inside hidden containers */
   .print-keep {
+    display: block !important;
+  }
+
+  /* Tailwind's screen utility can otherwise win over the print utility in
+     Chromium's print preview. Keep the complete printable roadmap/report
+     visible while hiding only interactive screen controls. */
+  .print\:block {
     display: block !important;
   }
 
@@ -116,4 +164,3 @@
     display: none !important;
   }
 }
-

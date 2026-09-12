@@ -9,7 +9,7 @@ from ..models import Scheme
 # Definitive Conflict Graph: Incompatible Pairs
 STATUTORY_CONFLICT_PAIRS = [
     # Dual scholarship restriction
-    ("post_matric_sc", "national_merit_scholarship", "Statutory Clause 7: Concurrent receipt of two centrally funded educational scholarships is prohibited."),
+    ("post_matric_scholarship", "state_higher_ed_stipend", "Statutory Clause 7: Concurrent receipt of two centrally funded educational scholarships is prohibited."),
     # Dual crop input subsidy / credit subsidy duplication
     ("pm_kisan_credit_card", "state_rythu_bandhu_crop_loan", "Statutory Rule: Subsidized crop-loan interest subvention cannot be claimed concurrently for the same survey number."),
     # Solar pump dual capital subsidy

@@ -1,15 +1,17 @@
 """
 Benefit Strategist Orchestrator:
-The central control plane coordinating the decision pipeline:
-Rules -> Eligibility -> Exclusions -> Conflicts -> PuLP Optimization -> Documents -> Roadmap.
+    The central control plane coordinating the decision pipeline:
+Rules -> Eligibility -> Exclusions -> Conflicts -> Documents -> PuLP Optimization -> Roadmap.
 """
 from typing import List, Dict, Tuple
+import time
 from .models import (
     CitizenProfile,
     Scheme,
     SchemeEvaluation,
     OptimizationResponse,
     OptimizationRequest
+    ,DecisionAudit
 )
 from .engines.eligibility import evaluate_eligibility
 from .engines.exclusions import evaluate_exclusions
@@ -24,6 +26,7 @@ class BenefitStrategistOrchestrator:
         self.conflict_map = build_conflict_matrix(scheme_catalog)
 
     def process(self, request: OptimizationRequest) -> OptimizationResponse:
+        started_at = time.time()
         profile = request.profile
         declared_docs = request.declared_document_ids
 
@@ -53,16 +56,51 @@ class BenefitStrategistOrchestrator:
                 monetary_value=scheme.benefit.amount
             ))
 
-        # Step 3: Optimization Solver (PuLP + CBC under mutual conflict constraints)
-        bundle = optimize_bundle(eligible_schemes, self.conflict_map, declared_docs)
+        # Step 3: Document readiness runs on every eligible scheme before the
+        # final actionable optimization. This keeps document gating explicit.
+        readiness = analyze_document_readiness(eligible_schemes, declared_docs)
 
-        # Step 4: Document Engine (Readiness separation & missing docs)
-        # Readiness is evaluated against the potential conflict-free bundle so
-        # the response exposes both ready-now schemes and document-gated value.
-        readiness = analyze_document_readiness(bundle.potential_selected_schemes, declared_docs)
+        # Step 4: PuLP/CBC returns two views:
+        # - potential bundle: maximum compatible value across all eligible schemes
+        # - ready-now bundle: maximum compatible value among document-ready schemes
+        bundle = optimize_bundle(
+            eligible_schemes,
+            self.conflict_map,
+            declared_docs,
+            ready_scheme_ids=readiness.ready_scheme_ids,
+        )
 
         # Step 5: Roadmap Engine (Actionable topological checklist)
         roadmap = generate_roadmap(bundle.potential_selected_schemes, readiness.missing_docs_by_scheme)
+
+        conflict_count = sum(
+            1 for scheme_id, conflicts in self.conflict_map.items()
+            if scheme_id in {s.id for s in eligible_schemes}
+            for conflict_id in conflicts
+            if conflict_id in {s.id for s in eligible_schemes}
+        ) // 2
+        excluded_count = sum(1 for item in evaluations if item.status in {"INELIGIBLE", "BLOCKED_BY_EXCLUSION"})
+        audit = DecisionAudit(
+            catalog_version=self.catalog[0].kbVersion if self.catalog else "v2026.2-PS16",
+            catalog_size=len(self.catalog),
+            eligible_count=len(eligible_schemes),
+            excluded_count=excluded_count,
+            conflict_count=conflict_count,
+            declared_document_count=len(declared_docs),
+            ready_scheme_count=len(bundle.selected_schemes),
+            document_blocked_count=len(bundle.document_blocked_scheme_ids),
+            solver=f"PuLP/CBC when available; deterministic fallback otherwise ({bundle.solver_status})",
+            execution_time_ms=round((time.time() - started_at) * 1000, 2),
+            trace=[
+                "Validated citizen profile with Pydantic.",
+                f"Evaluated {len(self.catalog)} curated scheme rules.",
+                f"Applied negative exclusions to {excluded_count} schemes.",
+                f"Built conflict graph with {conflict_count} active conflict edge(s).",
+                "Evaluated document readiness across all eligible schemes before optimization.",
+                "Solved potential and ready-now bundles with PuLP/CBC constraints.",
+                "Generated document readiness and dependency-aware roadmap."
+            ]
+        )
 
         return OptimizationResponse(
             success=True,
@@ -70,4 +108,5 @@ class BenefitStrategistOrchestrator:
             bundle=bundle,
             readiness=readiness,
             roadmap=roadmap
+            ,audit=audit
         )

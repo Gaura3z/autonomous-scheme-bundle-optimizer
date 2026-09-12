@@ -12,6 +12,8 @@ import { detectSchemeConflicts } from './engine/conflicts';
 import { optimizeSchemeBundle } from './engine/optimizer';
 import { evaluateDocumentReadiness, buildDocumentDependencyGraph } from './engine/documents';
 import { generateApplicationRoadmap } from './engine/roadmap';
+import { MASTER_SCHEMES } from './data/schemes';
+import { BackendAuditResponse, verifyWithBackend } from './services/backendApi';
 
 // Layout Components
 import { Navbar } from './components/layout/Navbar';
@@ -36,6 +38,7 @@ import { DocumentReadinessView } from './components/stages/DocumentReadiness';
 import { DocumentDependencies } from './components/stages/DocumentDependencies';
 import { ApplicationRoadmap } from './components/stages/ApplicationRoadmap';
 import { RecommendationSummary } from './components/stages/RecommendationSummary';
+import { AdminPortal } from './components/admin/AdminPortal';
 
 const DEFAULT_PROFILE: CitizenProfile = {
   age: 22,
@@ -62,15 +65,19 @@ const DEFAULT_PROFILE: CitizenProfile = {
   enrolledInHigherEducation: true,
 };
 
+const DRAFT_STORAGE_KEY = 'ps16-citizen-assessment-draft-v1';
+type SavedAssessmentDraft = { profile: CitizenProfile; declaredDocumentIds: string[]; stage: AssessmentStage; savedAt: string };
+const readSavedDraft = (): SavedAssessmentDraft | null => {
+  try { const raw = localStorage.getItem(DRAFT_STORAGE_KEY); return raw ? JSON.parse(raw) as SavedAssessmentDraft : null; } catch { return null; }
+};
+
 export default function App() {
   const [stage, setStage] = useState<AssessmentStage>('LANDING');
   const [activeDemoId, setActiveDemoId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<CitizenProfile>(DEFAULT_PROFILE);
-  const [declaredDocumentIds, setDeclaredDocumentIds] = useState<string[]>([
-    'aadhaar',
-    'ration_card',
-    'bank_passbook'
-  ]);
+  const [profile, setProfile] = useState<CitizenProfile>(() => readSavedDraft()?.profile ?? DEFAULT_PROFILE);
+  const [declaredDocumentIds, setDeclaredDocumentIds] = useState<string[]>(() => readSavedDraft()?.declaredDocumentIds ?? ['aadhaar', 'ration_card', 'bank_passbook']);
+  const [resumeStage, setResumeStage] = useState<AssessmentStage>(() => readSavedDraft()?.stage ?? 'PROFILE');
+  const [hasSavedDraft, setHasSavedDraft] = useState(() => Boolean(readSavedDraft()));
 
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
   const [isDemoSelectorOpen, setIsDemoSelectorOpen] = useState(false);
@@ -88,7 +95,21 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [stage]);
 
+  useEffect(() => {
+    if (stage !== 'LANDING') {
+      const draft: SavedAssessmentDraft = { profile, declaredDocumentIds, stage, savedAt: new Date().toISOString() };
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      setResumeStage(stage);
+      setHasSavedDraft(true);
+    }
+  }, [profile, declaredDocumentIds, stage]);
+
   const normalizedStage = String(stage).toUpperCase();
+
+  const isAdminPortal = window.location.pathname === '/admin' || new URLSearchParams(window.location.search).get('admin') === '1';
+  if (isAdminPortal) {
+    return <AdminPortal onExit={() => { window.location.href = '/'; }} />;
+  }
 
   // Profile update handler
   const handleUpdateProfile = (partial: Partial<CitizenProfile>) => {
@@ -109,7 +130,11 @@ export default function App() {
     setProfile(DEFAULT_PROFILE);
     setDeclaredDocumentIds(['aadhaar', 'ration_card', 'bank_passbook']);
     setStage('LANDING');
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setHasSavedDraft(false);
   };
+
+  const handleContinueDraft = () => setStage(resumeStage === 'LANDING' ? 'PROFILE' : resumeStage);
 
   // ==========================================
   // DETERMINISTIC ENGINES PIPELINE
@@ -139,23 +164,60 @@ export default function App() {
 
   // 5. PuLP/CBC Mathematical Optimizer Bundle
   const bundle = useMemo(() => {
-    return optimizeSchemeBundle(eligibleSchemes, declaredDocumentIds);
+    const readinessBeforeOptimization = evaluateDocumentReadiness(eligibleSchemes, declaredDocumentIds);
+    return optimizeSchemeBundle(eligibleSchemes, declaredDocumentIds, readinessBeforeOptimization.readySchemes.map((scheme) => scheme.id));
   }, [eligibleSchemes, declaredDocumentIds]);
+
+  // The backend is authoritative when its selected IDs can be represented by
+  // the local catalog; otherwise the local result remains a safe fallback and
+  // the audit card exposes the catalog mismatch.
+  const [backendDecision, setBackendDecision] = useState<BackendAuditResponse | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    verifyWithBackend(profile, declaredDocumentIds, controller.signal)
+      .then(setBackendDecision)
+      .catch((error: unknown) => { if ((error as Error)?.name !== 'AbortError') setBackendDecision(null); });
+    return () => controller.abort();
+  }, [profile, declaredDocumentIds]);
+
+  const authoritativeBundle = useMemo(() => {
+    if (!backendDecision) return bundle;
+    const selectedIds = backendDecision.bundle.selected_scheme_ids;
+    const potentialIds = backendDecision.bundle.potential_selected_scheme_ids;
+    const selectedSchemes = selectedIds.map((id) => MASTER_SCHEMES.find((scheme) => scheme.id === id)).filter(Boolean);
+    const potentialSelectedSchemes = potentialIds.map((id) => MASTER_SCHEMES.find((scheme) => scheme.id === id)).filter(Boolean);
+    if (selectedSchemes.length !== selectedIds.length || potentialSelectedSchemes.length !== potentialIds.length) return bundle;
+    const selected = selectedSchemes as typeof bundle.selectedSchemes;
+    const potential = potentialSelectedSchemes as typeof bundle.selectedSchemes;
+    const total = selected.reduce((sum, scheme) => sum + scheme.benefit.monetaryValueAnnualPaise / 100, 0);
+    return {
+      ...bundle,
+      selectedSchemes: selected,
+      potentialSelectedSchemes: potential,
+      totalMonetaryAnnual: total,
+      potentialTotalMonetaryAnnual: potential.reduce((sum, scheme) => sum + scheme.benefit.monetaryValueAnnualPaise / 100, 0),
+      documentBlockedSchemes: potential.filter((scheme) => !selected.some((ready) => ready.id === scheme.id)).map((scheme) => ({
+        scheme,
+        missingDocumentIds: scheme.requiredDocumentIds.filter((id) => !declaredDocumentIds.includes(id))
+      })),
+      optimalityMetric: `Backend-authoritative PuLP/CBC selection from catalog ${backendDecision.audit.catalog_version}.`
+    };
+  }, [backendDecision, bundle, declaredDocumentIds]);
 
   // 6. Document readiness categorization (Ready vs Missing)
   const readiness = useMemo(() => {
-    return evaluateDocumentReadiness(bundle.potentialSelectedSchemes ?? bundle.selectedSchemes, declaredDocumentIds);
-  }, [bundle.selectedSchemes, declaredDocumentIds]);
+    return evaluateDocumentReadiness(authoritativeBundle.potentialSelectedSchemes ?? authoritativeBundle.selectedSchemes, declaredDocumentIds);
+  }, [authoritativeBundle, declaredDocumentIds]);
 
   // 7. Document dependency graph
   const documentDependencyNodes = useMemo(() => {
-    return buildDocumentDependencyGraph(bundle.potentialSelectedSchemes ?? bundle.selectedSchemes, declaredDocumentIds);
-  }, [bundle.potentialSelectedSchemes, bundle.selectedSchemes, declaredDocumentIds]);
+    return buildDocumentDependencyGraph(authoritativeBundle.potentialSelectedSchemes ?? authoritativeBundle.selectedSchemes, declaredDocumentIds);
+  }, [authoritativeBundle, declaredDocumentIds]);
 
   // 8. Actionable Application Roadmap
   const roadmapSteps = useMemo(() => {
-    return generateApplicationRoadmap(readiness, bundle.potentialSelectedSchemes ?? bundle.selectedSchemes);
-  }, [readiness, bundle.potentialSelectedSchemes, bundle.selectedSchemes]);
+    return generateApplicationRoadmap(readiness, authoritativeBundle.potentialSelectedSchemes ?? authoritativeBundle.selectedSchemes);
+  }, [readiness, authoritativeBundle]);
 
   // Document checklist toggling
   const handleToggleDocument = (docId: string) => {
@@ -201,7 +263,7 @@ export default function App() {
       </div>
 
       {/* Main Content Area with Page-to-Page Transitions */}
-      <main className="flex-1 w-full pb-16 overflow-x-hidden">
+      <main className="printable-root flex-1 w-full pb-16 overflow-x-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={normalizedStage}
@@ -216,6 +278,8 @@ export default function App() {
                 profile={profile}
                 onChangeProfile={handleUpdateProfile}
                 onStartAssessment={() => setStage('PROFILE')}
+                hasSavedDraft={hasSavedDraft}
+                onContinueDraft={handleContinueDraft}
                 onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
                 onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
                 onOpenArchitecture={() => setIsArchitectureOpen(true)}
@@ -244,6 +308,7 @@ export default function App() {
             {normalizedStage === 'QUESTIONNAIRE' && (
               <AdaptiveQuestionnaire
                 profile={profile}
+                candidateSchemes={candidateSchemes}
                 onChangeProfile={handleUpdateProfile}
                 onComplete={() => setStage('DOCUMENT_CHECKLIST')}
                 onBack={() => setStage('CANDIDATE_MATCH')}
@@ -267,7 +332,7 @@ export default function App() {
 
             {normalizedStage === 'DOCUMENT_CHECKLIST' && (
               <DocumentChecklist
-                bundleSchemes={candidateSchemes}
+                bundleSchemes={eligibleSchemes}
                 declaredDocumentIds={declaredDocumentIds}
                 onToggleDocument={handleToggleDocument}
                 onSelectAll={handleSelectAllDocuments}
@@ -287,7 +352,7 @@ export default function App() {
 
             {normalizedStage === 'OPTIMIZED_BUNDLE' && (
               <OptimizedBundleView
-                bundle={bundle}
+                bundle={authoritativeBundle}
                 onProceedToDocuments={() => setStage('DOCUMENT_READINESS')}
                 onBackToConflicts={() => setStage('CONFLICT_DETECTION')}
               />
@@ -320,9 +385,10 @@ export default function App() {
             {normalizedStage === 'RECOMMENDATION_SUMMARY' && (
               <RecommendationSummary
                 profile={profile}
-                bundle={bundle}
+                bundle={authoritativeBundle}
                 evaluations={evaluations}
                 roadmapSteps={roadmapSteps}
+                declaredDocumentIds={declaredDocumentIds}
                 onRestart={handleReset}
                 onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
                 onBackToRoadmap={() => setStage('APPLICATION_ROADMAP')}

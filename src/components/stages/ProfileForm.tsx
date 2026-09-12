@@ -1,6 +1,6 @@
 /**
  * Stage 1: Guided Progressive Profile Intake
- * Matches official Indian G2C myScheme chunked step-by-step experience:
+ * Matches a clear Indian G2C SchemeWise chunked step-by-step experience:
  * - 1-2 focused questions per step
  * - Tactile visual cards for Gender, Area, Category, and Disability
  * - Connected progress dots with checkmarks
@@ -26,8 +26,10 @@ import {
   CitizenProfile, 
   Gender, 
   SocialCategory, 
+  SocialCategoryDetail,
   AreaType, 
-  EmploymentStatus 
+  EmploymentStatus,
+  SelfEmploymentCategory
 } from '../../types';
 
 interface ProfileFormProps {
@@ -104,8 +106,34 @@ const INFO_DEFINITIONS: Record<string, InfoItem> = {
     title: 'Persons with Benchmark Disabilities (PwD)',
     description: 'Individuals with not less than 40% of a specified disability certified by a medical authority or verified through a Unique Disability ID (UDID) card.',
     statutoryReference: 'Rights of Persons with Disabilities (RPwD) Act, 2016'
+  },
+  MINORITY: {
+    title: 'Notified minority community',
+    description: 'Some government schemes provide targeted support to notified minority communities. Select Yes only when this applies to your official records.',
+    statutoryReference: 'Ministry of Minority Affairs / applicable scheme guidelines'
   }
 };
+
+const SELF_EMPLOYMENT_OPTIONS: {
+  value: SelfEmploymentCategory;
+  label: string;
+  detailLabel: string;
+  placeholder: string;
+}[] = [
+  { value: 'Farmer / Agriculture', label: 'Farmer / Agriculture', detailLabel: 'Type of farming', placeholder: 'Example: crops, dairy, poultry, or livestock' },
+  { value: 'Business Owner', label: 'Business Owner', detailLabel: 'Business type', placeholder: 'Example: manufacturing, services, or online business' },
+  { value: 'Shop Owner', label: 'Shop Owner', detailLabel: 'Shop or business details', placeholder: 'Example: grocery shop, clothing shop, or repair shop' },
+  { value: 'Trader', label: 'Trader', detailLabel: 'Trading activity', placeholder: 'Example: wholesale, retail, or agricultural trading' },
+  { value: 'Freelancer', label: 'Freelancer', detailLabel: 'Freelance field or service', placeholder: 'Example: design, writing, coding, or digital marketing' },
+  { value: 'Consultant', label: 'Consultant', detailLabel: 'Consulting field', placeholder: 'Example: finance, education, technology, or management' },
+  { value: 'Contractor', label: 'Contractor', detailLabel: 'Type of contracting work', placeholder: 'Example: construction, electrical, plumbing, or maintenance' },
+  { value: 'Driver / Transport', label: 'Driver / Transport', detailLabel: 'Type of transport or work', placeholder: 'Example: taxi, auto, delivery, or goods transport' },
+  { value: 'Artisan / Handicraft', label: 'Artisan / Handicraft', detailLabel: 'Type of craft or work', placeholder: 'Example: handloom, pottery, carpentry, or embroidery' },
+  { value: 'Skilled Worker', label: 'Skilled Worker', detailLabel: 'Skill or trade', placeholder: 'Example: electrician, mason, mechanic, or tailor' },
+  { value: 'Teacher / Tutor', label: 'Teacher / Tutor', detailLabel: 'Teaching type or subject', placeholder: 'Example: school subject, coaching, or music' },
+  { value: 'Professional Services', label: 'Professional Services', detailLabel: 'Profession or service type', placeholder: 'Example: legal, medical, accounting, or design services' },
+  { value: 'Other Self-Employment', label: 'Other Self-Employment', detailLabel: 'Occupation description', placeholder: 'Describe your self-employment work' }
+];
 
 export const ProfileForm: React.FC<ProfileFormProps> = ({
   profile,
@@ -115,9 +143,26 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [activeInfo, setActiveInfo] = useState<InfoItem | null>(null);
+  const [validationMessage, setValidationMessage] = useState('');
   const totalSteps = 5;
 
+  const validateStep = () => {
+    if (currentStep === 1 && (!profile.gender || profile.age < 15 || profile.age > 120)) return 'Please choose a gender and a valid age between 15 and 120.';
+    if (currentStep === 2 && (!profile.state || !profile.areaType)) return 'Please select your state and area of residence.';
+    if (currentStep === 3 && !profile.socialCategory) return 'Please select your social category.';
+    if (currentStep === 4 && profile.hasDisability && (!profile.disabilityPercentage || profile.disabilityPercentage < 1 || profile.disabilityPercentage > 100)) return 'Please select a valid certified disability percentage.';
+    if (currentStep === 5 && !['Student', 'Employed', 'Self-Employed'].includes(profile.employmentStatus)) return 'Please select Student, Employment, or Self-Employment.';
+    if (currentStep === 5 && profile.employmentStatus === 'Self-Employed' && !profile.selfEmploymentCategory) return 'Please select a self-employment category.';
+    if (currentStep === 5 && profile.employmentStatus === 'Self-Employed' && !profile.selfEmploymentDetails?.trim()) return 'Please add a short description of your self-employment work.';
+    if (currentStep === 5 && profile.employmentStatus === 'Self-Employed' && (profile.selfEmploymentMonthlyIncome === undefined || profile.selfEmploymentMonthlyIncome < 0)) return 'Please enter your monthly self-employment income.';
+    if (currentStep === 5 && profile.annualFamilyIncome < 0) return 'Please provide a valid annual income.';
+    return '';
+  };
+
   const handleNext = () => {
+    const error = validateStep();
+    if (error) { setValidationMessage(error); return; }
+    setValidationMessage('');
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -126,6 +171,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   };
 
   const handleBack = () => {
+    setValidationMessage('');
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -145,6 +191,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
       {/* Main Container Card */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-10 relative">
+        {validationMessage && <div role="alert" aria-live="polite" className="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{validationMessage}</div>}
         {/* Step Indicator Header with Back button */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -358,7 +405,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   Please select your area of residence
                 </label>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(['Urban', 'Rural'] as AreaType[]).map((area) => {
                     const isSelected = profile.areaType === area;
                     return (
@@ -398,8 +445,11 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 <span className="text-rose-500 mr-1">*</span>
                 You belong to...
               </label>
+              <p className="-mt-1 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-xs leading-relaxed text-blue-950">
+                Select one category only. Choose the most specific category shown on your official certificate. PVTG is a specific group within ST, and DNT is shown separately from the parent category so the system does not select two options.
+              </p>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2.5" role="radiogroup" aria-label="Social category">
                 {[
                   { id: 'General', label: 'General', infoKey: null },
                   { id: 'OBC', label: 'Other Backward Class (OBC)', infoKey: 'OBC' },
@@ -409,11 +459,35 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   { id: 'DNT', label: 'De-Notified, Nomadic, and Semi-Nomadic (DNT) communities', infoKey: 'DNT', subOf: 'OBC' },
                   { id: 'EWS', label: 'Economically Weaker Section (EWS)', infoKey: 'EWS' }
                 ].map((item) => {
-                  const isSelected = profile.socialCategory === (item.subOf || item.id);
+                  const isSelected = item.subOf
+                    ? profile.socialCategoryDetail === item.id
+                    : profile.socialCategoryDetail === undefined && profile.socialCategory === item.id;
+                  const selectCategory = () => {
+                    if (item.subOf) {
+                      onChangeProfile({
+                        socialCategory: item.subOf as SocialCategory,
+                        socialCategoryDetail: item.id as SocialCategoryDetail
+                      });
+                    } else {
+                      onChangeProfile({
+                        socialCategory: item.id as SocialCategory,
+                        socialCategoryDetail: undefined
+                      });
+                    }
+                  };
                   return (
                     <div
                       key={item.id}
-                      onClick={() => onChangeProfile({ socialCategory: (item.subOf || item.id) as SocialCategory })}
+                      role="radio"
+                      aria-checked={isSelected}
+                      tabIndex={0}
+                      onClick={selectCategory}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          selectCategory();
+                        }
+                      }}
                       className={`flex items-center justify-between p-3.5 px-4 rounded-xl border-2 transition-all cursor-pointer ${
                         isSelected
                           ? 'border-emerald-600 bg-emerald-50/20 text-emerald-800'
@@ -470,7 +544,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     type="button"
                     onClick={() => onChangeProfile({ hasDisability: true, disabilityPercentage: profile.disabilityPercentage || 40 })}
@@ -526,12 +600,58 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 </motion.div>
               )}
 
+              <div className="pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <label className="text-sm sm:text-base font-bold text-slate-900">
+                    <span className="text-rose-500 mr-1">*</span>
+                    Do you belong to a minority community?
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setActiveInfo(INFO_DEFINITIONS.MINORITY)}
+                    className="w-5 h-5 rounded-full bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-800 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
+                    title="View minority-community guidance"
+                  >
+                    <Info className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => onChangeProfile({ isMinority: true })}
+                    className={`py-3.5 px-4 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                      profile.isMinority === true
+                        ? 'border-emerald-600 bg-emerald-50/20 text-emerald-800 font-bold shadow-xs'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-700 font-semibold bg-white'
+                    }`}
+                  >
+                    <span className="text-sm">Yes</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onChangeProfile({ isMinority: false })}
+                    className={`py-3.5 px-4 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                      profile.isMinority !== true
+                        ? 'border-emerald-600 bg-emerald-50/20 text-emerald-800 font-bold shadow-xs'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-700 font-semibold bg-white'
+                    }`}
+                  >
+                    <span className="text-sm">No</span>
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  This helps identify schemes that specifically support notified minority communities.
+                </p>
+              </div>
+
               {profile.gender === 'Female' && (
                 <div className="pt-2 border-t border-slate-100">
                   <label className="block text-sm sm:text-base font-bold text-slate-900 mb-3">
                     What is your marital status?
                   </label>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(['Single', 'Married'] as const).map((status) => (
                       <button
                         key={status}
@@ -565,33 +685,37 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* Primary Occupation */}
+              {/* Primary employment status */}
               <div>
                 <label className="block text-sm sm:text-base font-bold text-slate-900 mb-2.5">
                   <span className="text-rose-500 mr-1">*</span>
-                  What is your primary occupation or status?
+                  Current Employment Status
                 </label>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {[
-                    { id: 'Farmer', label: 'Farmer / Agri' },
                     { id: 'Student', label: 'Student' },
-                    { id: 'Self-Employed', label: 'Artisan / Small Business' },
-                    { id: 'Daily Wage Worker', label: 'Daily Wage / Informal' },
-                    { id: 'Unemployed', label: 'Job Seeker' },
-                    { id: 'Employed', label: 'Salaried' }
-                  ].map((emp) => {
-                    const isSelected = profile.employmentStatus === emp.id;
+                    { id: 'Employed', label: 'Employment' },
+                    { id: 'Self-Employed', label: 'Self-Employment' }
+                  ].map((statusOption) => {
+                    const isSelected = profile.employmentStatus === statusOption.id;
                     return (
                       <button
-                        key={emp.id}
+                        key={statusOption.id}
                         type="button"
                         onClick={() => {
-                          const val = emp.id as EmploymentStatus;
+                          const status = statusOption.id as EmploymentStatus;
                           onChangeProfile({
-                            employmentStatus: val,
-                            isFarmer: val === 'Farmer',
-                            isStudent: val === 'Student'
+                            employmentStatus: status,
+                            isStudent: status === 'Student',
+                            occupation: status === 'Student' ? 'Student' : '',
+                            isFarmer: false,
+                            selfEmploymentCategory: undefined,
+                            selfEmploymentDetails: undefined,
+                            selfEmploymentMonthlyIncome: undefined,
+                            employmentRole: undefined,
+                            employerName: undefined,
+                            employmentMonthlyIncome: undefined
                           });
                         }}
                         className={`p-3 rounded-xl border-2 text-center transition-all cursor-pointer ${
@@ -600,39 +724,123 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                             : 'border-slate-200 hover:border-slate-300 text-slate-700 font-semibold bg-white'
                         }`}
                       >
-                        <span className="text-xs sm:text-sm">{emp.label}</span>
+                        <span className="text-xs sm:text-sm">{statusOption.label}</span>
                       </button>
                     );
                   })}
                 </div>
-              </div>
 
-              {/* Conditional Land Holding for Farmers */}
-              {profile.employmentStatus === 'Farmer' && (
-                <div className="p-4 bg-amber-50/50 border border-amber-200 rounded-2xl">
-                  <label htmlFor="input-land-acres" className="block text-xs font-bold text-amber-950 mb-1">
-                    Agricultural Landholding (Acres)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      id="input-land-acres"
-                      type="number"
-                      step="0.5"
-                      min="0.1"
-                      max="25"
-                      value={((profile.landholdingHectares || 1.0) * 2.47).toFixed(1)}
-                      onChange={(e) => {
-                        const acres = parseFloat(e.target.value) || 1.0;
-                        onChangeProfile({ landholdingHectares: acres / 2.47 });
-                      }}
-                      className="w-32 px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm bg-white"
-                    />
-                    <span className="text-xs text-slate-600">
-                      Small/Marginal Farmer limit: &le; 5 Acres (2.0 Hectares)
-                    </span>
+                {profile.employmentStatus === 'Employed' && (
+                  <div className="mt-5">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="text-xs font-bold text-slate-700">
+                        Job / Occupation
+                        <input
+                          type="text"
+                          value={profile.employmentRole || ''}
+                          onChange={(event) => onChangeProfile({ employmentRole: event.target.value, occupation: event.target.value })}
+                          placeholder="Example: Office assistant, engineer, nurse"
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
+                        />
+                      </label>
+                      <label className="text-xs font-bold text-slate-700">
+                        Organization / Company (optional)
+                        <input
+                          type="text"
+                          value={profile.employerName || ''}
+                          onChange={(event) => onChangeProfile({ employerName: event.target.value })}
+                          placeholder="Company or organization name"
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
+                        />
+                      </label>
+                      <label className="text-xs font-bold text-slate-700 sm:col-span-2">
+                        Monthly Employment Income (optional)
+                        <input
+                          type="number"
+                          min="0"
+                          value={profile.employmentMonthlyIncome ?? ''}
+                          onChange={(event) => onChangeProfile({ employmentMonthlyIncome: event.target.value === '' ? undefined : Number(event.target.value) })}
+                          placeholder="Enter amount in rupees"
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
+                        />
+                      </label>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {profile.employmentStatus === 'Self-Employed' && (
+                  <div className="mt-5 space-y-3 rounded-2xl border border-blue-200 bg-blue-50/40 p-4">
+                    <label className="block text-xs font-bold text-slate-700">
+                      <span className="text-rose-500 mr-1">*</span>
+                      Self-Employment Category
+                      <select
+                        value={profile.selfEmploymentCategory || ''}
+                        onChange={(event) => {
+                          const category = event.target.value as SelfEmploymentCategory;
+                          onChangeProfile({
+                            selfEmploymentCategory: category || undefined,
+                            selfEmploymentDetails: undefined,
+                            occupation: category || '',
+                            isFarmer: category === 'Farmer / Agriculture',
+                            landholdingHectares: category === 'Farmer / Agriculture' ? profile.landholdingHectares : undefined,
+                            isRainfedLand: category === 'Farmer / Agriculture' ? profile.isRainfedLand : undefined
+                          });
+                        }}
+                        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-900"
+                      >
+                        <option value="">Select a category</option>
+                        {SELF_EMPLOYMENT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      </select>
+                    </label>
+
+                    {profile.selfEmploymentCategory && (() => {
+                      const detail = SELF_EMPLOYMENT_OPTIONS.find((option) => option.value === profile.selfEmploymentCategory);
+                      if (!detail) return null;
+                      return (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <label className="text-xs font-bold text-slate-700 sm:col-span-2">
+                            <span className="text-rose-500 mr-1">*</span>
+                            {detail.detailLabel}
+                            <input
+                              type="text"
+                              value={profile.selfEmploymentDetails || ''}
+                              onChange={(event) => onChangeProfile({ selfEmploymentDetails: event.target.value, occupation: event.target.value })}
+                              placeholder={detail.placeholder}
+                              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
+                            />
+                          </label>
+                          <label className="text-xs font-bold text-slate-700">
+                            <span className="text-rose-500 mr-1">*</span>
+                            Monthly Self-Employment Income
+                            <input
+                              type="number"
+                              min="0"
+                              value={profile.selfEmploymentMonthlyIncome ?? ''}
+                              onChange={(event) => onChangeProfile({ selfEmploymentMonthlyIncome: event.target.value === '' ? undefined : Number(event.target.value) })}
+                              placeholder="Enter amount in rupees"
+                              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
+                            />
+                          </label>
+                          {profile.selfEmploymentCategory === 'Farmer / Agriculture' && (
+                            <label className="text-xs font-bold text-slate-700">
+                              Agricultural Landholding (hectares, optional)
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                value={profile.landholdingHectares ?? ''}
+                                onChange={(event) => onChangeProfile({ landholdingHectares: event.target.value === '' ? undefined : Number(event.target.value) })}
+                                placeholder="Example: 1.5"
+                                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900"
+                              />
+                            </label>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
 
               {/* Annual Income Slider */}
               <div className="space-y-2 pt-1">
@@ -665,7 +873,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
               </div>
 
               {/* Household Cards (Ration Card / BPL) */}
-              <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div
                   onClick={() => onChangeProfile({ hasRationCard: !profile.hasRationCard })}
                   className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${

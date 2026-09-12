@@ -23,12 +23,17 @@ import {
   FileCheck2
 } from 'lucide-react';
 import { OptimizedBundle, SchemeEvaluation, CitizenProfile, RoadmapStep } from '../../types';
+import { BackendAuditCard } from './BackendAuditCard';
+import { CATALOG_VERSION } from '../../data/schemes';
+import { MASTER_DOCUMENTS } from '../../data/documents';
+import { getBundleValidity } from '../../engine/validity';
 
 interface RecommendationSummaryProps {
   profile: CitizenProfile;
   bundle: OptimizedBundle;
   evaluations: SchemeEvaluation[];
   roadmapSteps: RoadmapStep[];
+  declaredDocumentIds: string[];
   onRestart: () => void;
   onOpenDemoSelector: () => void;
   onBackToRoadmap?: () => void;
@@ -39,6 +44,7 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
   bundle,
   evaluations,
   roadmapSteps,
+  declaredDocumentIds,
   onRestart,
   onOpenDemoSelector,
   onBackToRoadmap
@@ -50,6 +56,14 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
   const excludedSchemes = evaluations.filter(
     (ev) => ev.status === 'INELIGIBLE' || ev.status === 'BLOCKED_BY_EXCLUSION'
   );
+  const allBundleSchemes = bundle.selectedSchemes.length > 0 ? bundle.selectedSchemes : (bundle.potentialSelectedSchemes ?? []);
+  const bundleValidity = getBundleValidity(allBundleSchemes);
+  const missingDocumentIds: string[] = Array.from(new Set<string>(
+    (bundle.documentBlockedSchemes ?? []).flatMap((item) => item.missingDocumentIds)
+  ));
+  const categoryLabel = profile.socialCategoryDetail
+    ? `${profile.socialCategoryDetail} (${profile.socialCategory})`
+    : profile.socialCategory;
 
   // Generate offline audit text report
   const handleExportTextAudit = () => {
@@ -64,16 +78,20 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
     content += `AUTONOMOUS SCHEME-BUNDLE OPTIMIZER — CITIZEN DECISION AUDIT REPORT\n`;
     content += `Kurukshetra 2.0 HACKFEST 2026 PS16\n`;
     content += `Audit Date: ${dateStr}\n`;
+    content += `Catalog Version: ${CATALOG_VERSION}\n`;
+    content += `Bundle Validity: ${bundleValidity.validUntil ? `${bundleValidity.label}: ${bundleValidity.displayDate}` : bundleValidity.label}\n`;
+    content += `Validity Note: ${bundleValidity.note}\n`;
     content += `===============================================================================\n\n`;
 
     content += `CITIZEN PROFILE:\n`;
     content += `Age: ${profile.age} | Gender: ${profile.gender} | State: ${profile.state}\n`;
-    content += `Social Category: ${profile.socialCategory} | Occupation: ${profile.occupationCategory || 'General'}\n`;
+    content += `Social Category: ${categoryLabel} | Occupation: ${profile.occupationCategory || 'General'}\n`;
     content += `Annual Family Income: INR ${profile.annualFamilyIncome.toLocaleString('en-IN')}\n\n`;
 
     content += `===============================================================================\n`;
     content += `1. SELECTED SCHEMES IN OPTIMIZED BUNDLE (${bundle.selectedSchemes.length} Schemes):\n`;
     content += `   Total Direct Monetary Benefit: ${bundle.totalMonetaryBenefit}\n`;
+    content += `   Conflicts resolved / alternatives rejected: ${bundle.conflictsResolvedCount}\n`;
     content += `===============================================================================\n\n`;
 
     bundle.selectedSchemes.forEach((scheme, i) => {
@@ -81,6 +99,10 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
       content += `    Ministry: ${scheme.ministry}\n`;
       content += `    Benefit: ${scheme.benefit.displayAmount} (${scheme.benefit.type})\n`;
       content += `    Description: ${scheme.tagline}\n`;
+      content += `    Last Verified: ${scheme.lastVerifiedDate} | Knowledge Base: ${scheme.kbVersion}\n`;
+      content += `    Official Source: ${scheme.officialSourceUrl}\n`;
+      content += `    Application Date: ${scheme.applicationDeadline || 'No fixed deadline recorded'}\n`;
+      content += `    Date Note: ${scheme.validityNote || 'Verify the official portal before filing.'}\n`;
       content += `    Statutory Decision: Qualified all eligibility thresholds without negative exclusion\n`;
       content += `\n`;
     });
@@ -89,13 +111,28 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
     content += `2. EXCLUDED ALTERNATIVES & THRESHOLD FAILURES:\n`;
     content += `===============================================================================\n\n`;
 
-    excludedSchemes.slice(0, 10).forEach((ev, i) => {
+    excludedSchemes.forEach((ev, i) => {
       content += `[${i + 1}] ${ev.scheme.name}\n`;
       content += `    Reason: ${ev.unmetReasons.concat(ev.exclusionReasons).join('; ') || 'Criteria mismatch'}\n\n`;
+      content += `    Official Source: ${ev.scheme.officialSourceUrl}\n`;
+      content += `    Last Verified: ${ev.scheme.lastVerifiedDate}\n\n`;
     });
 
     content += `===============================================================================\n`;
-    content += `3. STATUTORY CONFLICT & TRADE-OFF ARBITRATIONS:\n`;
+    content += `3. MISSING DOCUMENTS / READINESS BLOCKERS:\n`;
+    content += `===============================================================================\n\n`;
+    if (missingDocumentIds.length > 0) {
+      missingDocumentIds.forEach((documentId) => {
+        content += `[ ] ${MASTER_DOCUMENTS[documentId]?.name || documentId}\n`;
+        content += `    Declared by citizen: ${declaredDocumentIds.includes(documentId) ? 'Yes' : 'No'}\n`;
+        content += `    Required by: ${(bundle.documentBlockedSchemes ?? []).filter((item) => item.missingDocumentIds.includes(documentId)).map((item) => item.scheme.name).join(', ') || 'Selected bundle'}\n\n`;
+      });
+    } else {
+      content += `No missing documents were recorded for the actionable bundle.\n\n`;
+    }
+
+    content += `===============================================================================\n`;
+    content += `4. STATUTORY CONFLICT & TRADE-OFF ARBITRATIONS:\n`;
     content += `===============================================================================\n\n`;
 
     if (bundle.rejectedAlternatives.length > 0) {
@@ -108,7 +145,7 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
     }
 
     content += `===============================================================================\n`;
-    content += `4. IMMEDIATE APPLICATION ROADMAP CHECKLIST:\n`;
+    content += `5. IMMEDIATE APPLICATION ROADMAP CHECKLIST:\n`;
     content += `===============================================================================\n\n`;
 
     roadmapSteps.forEach((step) => {
@@ -121,6 +158,24 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
     });
 
     content += `===============================================================================\n`;
+    content += `6. POTENTIAL BUNDLE (IF DOCUMENTS ARE COMPLETED):\n`;
+    content += `===============================================================================\n\n`;
+    (bundle.potentialSelectedSchemes ?? []).forEach((scheme) => {
+      content += `- ${scheme.name} | ${scheme.benefit.displayAmount} | ${scheme.officialSourceUrl}\n`;
+    });
+    if (!(bundle.potentialSelectedSchemes ?? []).length) content += `No separate potential bundle was returned.\n`;
+    content += `\n`;
+
+    content += `===============================================================================\n`;
+    content += `7. FUTURE / CONDITIONAL VERIFICATION ITEMS:\n`;
+    content += `===============================================================================\n\n`;
+    content += `These are intentionally not used to change today's recommendation:\n`;
+    content += `- State-specific or phase-specific closing windows, if the official source publishes them.\n`;
+    content += `- Rolling-window confirmation for schemes without a fixed deadline.\n`;
+    content += `- Re-application, appeal, or renewal rules when the admin catalog supports them.\n`;
+    content += `- Fresh source verification before a future catalog release.\n\n`;
+
+    content += `===============================================================================\n`;
     content += `CIVIC AUDIT VERIFICATION: Deterministic calculation by PS16 Rule & Optimization Engines.\n`;
     content += `===============================================================================\n`;
 
@@ -128,7 +183,7 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `myScheme_Decision_Audit_${new Date().toISOString().slice(0, 10)}.txt`;
+    link.download = `SchemeWise_Decision_Audit_${new Date().toISOString().slice(0, 10)}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -142,7 +197,7 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
         <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
           <div>
             <div className="text-[10pt] font-extrabold uppercase tracking-wider text-slate-800">
-              Government of India • National myScheme Portal
+              SchemeWise Citizen Benefits Portal
             </div>
             <h1 className="text-xl font-black text-slate-900 mt-0.5">
               Citizen Benefit Recommendation & Decision Audit
@@ -217,12 +272,25 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
       <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-8 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 print:bg-white print:border-slate-300 print:p-3 print:rounded-none">
         <div>
           <strong className="text-slate-900">Evaluated Profile: </strong>
-          <span>Age: {profile.age}</span> • <span>Gender: {profile.gender}</span> • <span>State: {profile.state}</span> • <span>Category: {profile.socialCategory}</span> • <span>Income: ₹{(profile.annualFamilyIncome).toLocaleString('en-IN')}/yr</span>
+          <span>Age: {profile.age}</span> • <span>Gender: {profile.gender}</span> • <span>State: {profile.state}</span> • <span>Category: {categoryLabel}</span> • <span>Income: ₹{(profile.annualFamilyIncome).toLocaleString('en-IN')}/yr</span>
         </div>
         <span className="font-mono text-[11px] text-slate-500 print:text-slate-800">
           Generated via PS16 Autonomous Optimizer • {bundle.selectedSchemes.length} Schemes • Value: {bundle.totalMonetaryBenefit}
         </span>
       </div>
+
+      <div className="mb-8 grid gap-3 sm:grid-cols-3 text-xs">
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-950"><span className="block font-bold uppercase tracking-wider text-[10px] text-blue-700">Catalog version</span><strong className="mt-1 block">{CATALOG_VERSION}</strong><span className="mt-1 block text-blue-800">Used for this report</span></div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950"><span className="block font-bold uppercase tracking-wider text-[10px] text-amber-700">Bundle validity</span><strong className="mt-1 block">{bundleValidity.validUntil ? bundleValidity.displayDate : bundleValidity.label}</strong><span className="mt-1 block text-amber-900">{bundleValidity.note}</span></div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-800"><span className="block font-bold uppercase tracking-wider text-[10px] text-slate-500">Missing documents</span><strong className="mt-1 block">{missingDocumentIds.length}</strong><span className="mt-1 block text-slate-500">Readiness blockers in this decision</span></div>
+      </div>
+
+      <BackendAuditCard
+        profile={profile}
+        declaredDocumentIds={declaredDocumentIds}
+        frontendSelectedSchemeIds={bundle.selectedSchemes.map((scheme) => scheme.id)}
+        frontendPotentialSchemeIds={(bundle.potentialSelectedSchemes ?? bundle.selectedSchemes).map((scheme) => scheme.id)}
+      />
 
       {/* 4 Pillars of Civic Transparency */}
       <div className="space-y-8">
@@ -252,6 +320,13 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
                 <p className="text-slate-600 mb-1.5">{scheme.tagline}</p>
                 <div className="text-[11px] text-slate-500">
                   ✓ Qualified all demographic, domicile, and income ceilings without statutory conflict.
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                  <span>Last verified: {scheme.lastVerifiedDate}</span>
+                  <span>KB: {scheme.kbVersion}</span>
+                  <a className="font-semibold text-blue-700 hover:underline" href={scheme.officialSourceUrl} target="_blank" rel="noreferrer">
+                    Official source
+                  </a>
                 </div>
               </div>
             ))}
@@ -392,4 +467,3 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
     </div>
   );
 };
-

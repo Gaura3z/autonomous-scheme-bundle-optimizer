@@ -32,7 +32,7 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
   onProceedToConflicts,
   onBackToQuestions
 }) => {
-  const [filter, setFilter] = useState<'ALL' | 'ELIGIBLE' | 'INELIGIBLE'>('ALL');
+  const [filter, setFilter] = useState<'ELIGIBLE' | 'POSSIBLY_ELIGIBLE' | 'INELIGIBLE'>('ELIGIBLE');
   const [expandedSchemeId, setExpandedSchemeId] = useState<string | null>(null);
 
   const eligibleCount = evaluations.filter((e) => e.status === 'ELIGIBLE').length;
@@ -40,9 +40,10 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
   const ineligibleCount = evaluations.filter((e) => e.status === 'INELIGIBLE' || e.status === 'BLOCKED_BY_EXCLUSION').length;
 
   const filteredEvaluations = evaluations.filter((ev) => {
-    if (filter === 'ELIGIBLE') return ev.status === 'ELIGIBLE' || ev.status === 'POSSIBLY_ELIGIBLE';
+    if (filter === 'ELIGIBLE') return ev.status === 'ELIGIBLE';
+    if (filter === 'POSSIBLY_ELIGIBLE') return ev.status === 'POSSIBLY_ELIGIBLE';
     if (filter === 'INELIGIBLE') return ev.status === 'INELIGIBLE' || ev.status === 'BLOCKED_BY_EXCLUSION';
-    return true;
+    return false;
   });
 
   const toggleExpand = (id: string) => {
@@ -95,18 +96,8 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-          <button
-            onClick={() => setFilter('ALL')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-              filter === 'ALL'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-          >
-            All Schemes ({evaluations.length})
-          </button>
+        {/* Mutually exclusive result groups */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
           <button
             onClick={() => setFilter('ELIGIBLE')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
@@ -115,7 +106,7 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            Eligible ({eligibleCount})
+            Eligible recommendations ({eligibleCount})
           </button>
           <button
             onClick={() => setFilter('INELIGIBLE')}
@@ -127,12 +118,37 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
           >
             Ineligible ({ineligibleCount})
           </button>
+          <button
+            onClick={() => setFilter('POSSIBLY_ELIGIBLE')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+              filter === 'POSSIBLY_ELIGIBLE'
+                ? 'bg-amber-600 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            Needs information ({possiblyCount})
+          </button>
         </div>
       </div>
 
       {/* Evaluation List */}
       <div className="space-y-4 mb-8">
-        {filteredEvaluations.map((ev) => {
+        {filteredEvaluations.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-8 text-center shadow-2xs">
+            <p className="text-sm font-semibold text-slate-800">
+              {filter === 'ELIGIBLE'
+                ? 'No confirmed eligible schemes found.'
+                : filter === 'POSSIBLY_ELIGIBLE'
+                ? 'No schemes need additional information.'
+                : 'No ineligible schemes in this assessment.'}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {filter === 'ELIGIBLE'
+                ? 'Review your answers or open “Needs information” to see schemes requiring more details.'
+                : 'Only schemes in this result group are shown here.'}
+            </p>
+          </div>
+        ) : filteredEvaluations.map((ev) => {
           const isExpanded = expandedSchemeId === ev.scheme.id;
           const isEligible = ev.status === 'ELIGIBLE';
           const isPossibly = ev.status === 'POSSIBLY_ELIGIBLE';
@@ -200,17 +216,20 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
 
                 {/* Expand "Why?" Button */}
                 <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  aria-controls={`eligibility-details-${ev.scheme.id}`}
                   onClick={() => toggleExpand(ev.scheme.id)}
                   className="self-start sm:self-center inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer"
                 >
-                  <span>Why {isEligible ? 'Eligible?' : 'Ineligible?'}</span>
+                  <span>Why {isEligible ? 'Eligible?' : isPossibly ? 'More information?' : 'Ineligible?'}</span>
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
               </div>
 
               {/* Expandable Criteria Audit Panel */}
               {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-slate-100 text-xs space-y-3 animate-in fade-in duration-150">
+                <div id={`eligibility-details-${ev.scheme.id}`} className="mt-4 pt-4 border-t border-slate-100 text-xs space-y-3 animate-in fade-in duration-150">
                   {/* Matched Positive Criteria */}
                   {ev.matchedPositiveReasons.length > 0 && (
                     <div>
@@ -253,18 +272,23 @@ export const EligibilityResults: React.FC<EligibilityResultsProps> = ({
                     </div>
                   )}
 
-                  {/* Official Source Link */}
-                  <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
-                    <span>Verified Knowledge Base: {ev.scheme.kbVersion} (Last Checked: {ev.scheme.lastVerifiedDate})</span>
-                    <a
-                      href={ev.scheme.officialSourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-blue-700 hover:underline"
-                    >
-                      Official Gazette Source
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                  {/* Verification metadata and official application action */}
+                  <div className="pt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-[11px] text-slate-400 border-t border-slate-100">
+                    <span>
+                      Verified Knowledge Base: {ev.scheme.kbVersion} (Last Checked: {ev.scheme.lastVerifiedDate})
+                    </span>
+                    {isEligible && (
+                      <a
+                        href={ev.scheme.officialSourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Visit the official website for ${ev.scheme.name}`}
+                        className="inline-flex items-center gap-1 text-blue-700 text-xs font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 rounded"
+                      >
+                        Official Website
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
                 </div>
               )}

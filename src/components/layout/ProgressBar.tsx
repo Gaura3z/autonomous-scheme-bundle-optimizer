@@ -91,11 +91,13 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStage, onNaviga
         {/* Desktop view */}
         <div className="hidden sm:flex items-center justify-between relative">
           {/* Background rail */}
-          <div className="absolute top-1/2 left-3 right-3 h-1 bg-slate-200/90 -translate-y-1/2 z-0 rounded-full" />
+          {/* The rail is aligned to the center of the 28px step circles.
+              It must not use 50% of the whole item because labels sit below. */}
+          <div className="absolute top-3.5 left-3 right-3 h-1 bg-slate-200/90 -translate-y-1/2 z-0 rounded-full" />
           
           {/* Animated active progress fill */}
           <motion.div
-            className="absolute top-1/2 left-3 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 -translate-y-1/2 z-0 rounded-full shadow-xs"
+            className="absolute top-3.5 left-3 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 -translate-y-1/2 z-0 rounded-full shadow-xs"
             initial={{ width: '0%' }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ type: 'spring', stiffness: 120, damping: 20 }}

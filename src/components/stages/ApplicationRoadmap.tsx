@@ -100,6 +100,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
       content += `    Estimated Timeline: ${step.estimatedTimeline}\n`;
       content += `    Status: ${isDone ? 'Completed' : 'Pending Action'}\n`;
       content += `    Action Details: ${step.description}\n`;
+      if (step.applicationDeadline) content += `    Apply By: ${step.applicationDeadline}\n`;
       if (step.criticalDependency) {
         content += `    CRITICAL PREREQUISITE: ${step.criticalDependency}\n`;
       }
@@ -126,7 +127,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `myScheme_Application_Roadmap_${new Date().toISOString().slice(0, 10)}.txt`;
+    link.download = `SchemeWise_Application_Roadmap_${new Date().toISOString().slice(0, 10)}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -140,7 +141,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
 
   // Quick Share / Copy Text summary to clipboard
   const handleCopySummary = () => {
-    const summaryText = `myScheme Application Roadmap (${initialSteps.length} Steps):\n` +
+    const summaryText = `SchemeWise Application Roadmap (${initialSteps.length} Steps):\n` +
       initialSteps.map(s => `${s.stepNumber}. ${s.title} [${s.estimatedTimeline}]`).join('\n');
     navigator.clipboard.writeText(summaryText);
     setCopiedNotification(true);
@@ -154,7 +155,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
         <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
           <div>
             <div className="text-[10pt] font-extrabold uppercase tracking-wider text-slate-800">
-              Government of India • National myScheme Portal
+              SchemeWise Citizen Benefits Portal
             </div>
             <h1 className="text-xl font-black text-slate-900 mt-0.5">
               Actionable Citizen Application Roadmap
@@ -292,7 +293,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
       </motion.div>
 
       {/* Sequenced Action List */}
-      <div className="relative pl-6 sm:pl-8 border-l-2 border-blue-200 print:border-slate-400 space-y-6 mb-8 ml-3 sm:ml-4">
+      <div className="relative pl-6 sm:pl-8 border-l-2 border-blue-200 print:border-slate-400 space-y-6 mb-8 ml-3 sm:ml-4 print:hidden">
         {filteredSteps.map((step, idx) => {
           const isDone = !!completedSteps[step.id];
 
@@ -365,13 +366,20 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
                   {step.description}
                 </p>
 
+                {step.applicationDeadline && (
+                  <div className="mb-3 inline-flex flex-wrap items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-900">
+                    <Calendar className="h-3.5 w-3.5" /> Apply by: {step.applicationDeadline}
+                    {step.validityNote && <span className="font-normal">· {step.validityNote}</span>}
+                  </div>
+                )}
+
                 {step.criticalDependency && (
                   <div className="text-[11px] font-medium text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200/70 mb-3 print:bg-slate-50 print:border-slate-300">
                     ⚠ {step.criticalDependency}
                   </div>
                 )}
 
-                {/* Official Action Portal Link & Printed URL */}
+                {/* Official application portal link & printed URL */}
                 {step.actionUrl && (
                   <div className="pt-3 border-t border-slate-100 print:border-slate-300 flex items-center justify-between">
                     <span className="text-[11px] text-slate-400 print:text-slate-700">
@@ -383,7 +391,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors print:hidden"
                     >
-                      Open Application Desk
+                      Apply Now
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -392,6 +400,19 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
             </motion.div>
           );
         })}
+      </div>
+
+      {/* Print uses the complete roadmap, even when a screen phase filter is active. */}
+      <div className="hidden print:block space-y-4 mb-8 ml-3 pl-6 border-l-2 border-slate-400">
+        {initialSteps.map((step) => (
+          <article key={`print-${step.id}`} className="relative rounded-none border border-slate-300 bg-white p-3 print-avoid-break">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">Step {step.stepNumber} · {step.phase} · {step.estimatedTimeline}</div>
+            <h3 className="text-base font-bold text-slate-900">{step.title}</h3>
+            <p className="mt-1 text-xs leading-relaxed text-slate-700">{step.description}</p>
+            {step.criticalDependency && <p className="mt-2 border border-slate-300 bg-slate-50 p-2 text-[11px] text-slate-800">Prerequisite: {step.criticalDependency}</p>}
+            {step.actionUrl && <p className="mt-2 border-t border-slate-300 pt-2 font-mono text-[10px] text-slate-700">Official portal: {step.actionUrl}</p>}
+          </article>
+        ))}
       </div>
 
       {/* Navigation & Export Footer (Hidden on Print) */}
@@ -424,4 +445,3 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
     </div>
   );
 };
-

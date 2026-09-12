@@ -16,9 +16,12 @@ import {
   ShieldCheck, 
   AlertCircle,
   TrendingUp,
-  Plus
+  Plus,
+  Printer,
+  ExternalLink
 } from 'lucide-react';
 import { OptimizedBundle, Scheme } from '../../types';
+import { getBundleValidity } from '../../engine/validity';
 
 interface OptimizedBundleProps {
   bundle: OptimizedBundle;
@@ -32,6 +35,7 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
   onBackToConflicts
 }) => {
   const [showWhyModal, setShowWhyModal] = useState(false);
+  const validity = getBundleValidity(bundle.selectedSchemes.length > 0 ? bundle.selectedSchemes : (bundle.potentialSelectedSchemes ?? []));
 
   useEffect(() => {
     // Subtle celebratory confetti on initial render
@@ -64,9 +68,30 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
           Your Recommended Scheme Bundle
         </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
           This is your document-ready bundle: schemes that are eligible, legally compatible, and actionable with the documents you declared.
         </p>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs hover:border-blue-400 hover:text-blue-800 print:hidden"
+        >
+          <Printer className="h-4 w-4" />
+          Print / Save PDF
+        </button>
+      </div>
+
+      <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-800">Bundle validity</p>
+            <p className="mt-1 font-extrabold">{validity.validUntil ? `${validity.label}: ${validity.displayDate}` : validity.label}</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-900">{validity.note}</p>
+          </div>
+          <span className="rounded-full border border-amber-300 bg-white px-3 py-1 text-[11px] font-bold text-amber-900">
+            Earliest selected-scheme date
+          </span>
+        </div>
       </div>
 
       {(bundle.potentialSelectedSchemes?.length ?? 0) > bundle.selectedSchemes.length && (
@@ -182,7 +207,10 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
 
         {/* Connected Cards Flow */}
         <div className="space-y-3">
-          {bundle.selectedSchemes.map((scheme, index) => (
+          {bundle.selectedSchemes.map((scheme, index) => {
+            const applicationUrl = scheme.applicationSteps[0]?.portalUrl || scheme.officialSourceUrl;
+
+            return (
             <div key={scheme.id} className="relative">
               <div className="bg-white rounded-2xl border-2 border-blue-600/30 p-5 shadow-xs hover:border-blue-600 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3.5">
@@ -206,6 +234,21 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
                     <p className="text-xs text-slate-600 mt-0.5">
                       {scheme.tagline}
                     </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                      <span>Last verified: {scheme.lastVerifiedDate}</span>
+                      <span>KB: {scheme.kbVersion}</span>
+                      <span>{scheme.applicationDeadline ? `Apply by: ${scheme.applicationDeadline}` : 'No fixed deadline recorded'}</span>
+                      <a
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-900 px-2.5 py-1 font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1"
+                        href={applicationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Apply for ${scheme.name} on the official portal`}
+                      >
+                        Apply Now
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
                   </div>
                 </div>
 
@@ -229,7 +272,8 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

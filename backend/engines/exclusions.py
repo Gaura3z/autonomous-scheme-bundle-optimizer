@@ -34,7 +34,7 @@ def evaluate_exclusions(profile: CitizenProfile, scheme: Scheme) -> List[str]:
             exclusions.append("Exclusion Clause: Beneficiary must belong exclusively to unorganized sector with no EPF/ESIC/NPS membership.")
 
     # 4. Age Cap Exclusions (e.g. Atal Pension Yojana)
-    elif s_id == "atal_pension":
+    elif s_id == "pension_apy":
         if profile.isTaxPayer:
             exclusions.append("Exclusion Clause: Subscribing to APY is restricted for income tax filers per recent finance ministry gazette.")
 

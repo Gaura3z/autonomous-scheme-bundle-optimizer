@@ -18,7 +18,7 @@ Citizens navigating welfare schemes in India (across 4,770+ Central and State pr
 2. **Statutory Clawbacks & Mutually Exclusive Conflicts**: Applying for two conflicting schemes (e.g. state farm input subsidy + central pension or overlapping higher education scholarships) often results in application rejection, clawback penalties, or permanent disqualification.
 3. **Application Friction**: Lack of sequenced prerequisite roadmaps and document inventories leads to abandoned registrations and missed deadlines.
 
-**Our Solution**: An **Autonomous Decision-Support and Conflict-Free Scheme-Bundle Optimizer** built on top of the official **myScheme (MeitY/NeGD)** design standard. It evaluates citizen profiles deterministically, eliminates statutory conflicts using an exclusion matrix, maximizes total monetary and social utility, and produces an actionable, sequenced document roadmap without requiring Aadhaar or sensitive uploads.
+**Our Solution**: **SchemeWise** is an **Autonomous Decision-Support and Conflict-Free Scheme-Bundle Optimizer** inspired by official **myScheme (MeitY/NeGD)** citizen-service design standards. It evaluates citizen profiles deterministically, eliminates statutory conflicts using an exclusion matrix, maximizes total monetary and social utility, and produces an actionable, sequenced document roadmap without requiring Aadhaar or sensitive uploads.
 
 ---
 
@@ -26,7 +26,7 @@ Citizens navigating welfare schemes in India (across 4,770+ Central and State pr
 
 | Feature | Description |
 | :--- | :--- |
-| **Authentic myScheme Design** | Faithful recreation of official myScheme & Digital India standards: civic emblem, search bar, language switcher, pastel stat cards, and 3-way categories/states/ministries tabs. |
+| **SchemeWise Citizen Experience** | SchemeWise implementation inspired by official myScheme & Digital India standards: civic emblem, search bar, language switcher, pastel stat cards, and 3-way categories/states/ministries tabs. |
 | **Autonomous Deterministic Engine** | Rule-evaluation pipeline matching demographic, regional, and livelihood attributes against gazette conditions without hallucination. |
 | **Conflict & Exclusion Matrix** | Detects mutually exclusive programs (e.g., dual scholarship exclusions, institutional farmer income restrictions) and resolves them to maximize net citizen benefit. |
 | **Document Prerequisite Sequencer** | Identifies the minimal common set of documents needed (Aadhaar, Land Record 7/12, Income Certificate, etc.) and generates a phased timeline. |
@@ -66,7 +66,7 @@ KH001-TeamName/
 │
 ├── screenshots/               # High-Resolution Application Screenshots
 │   ├── README.md              # Screenshot descriptions
-│   ├── screenshot-1.png       # Authentic myScheme Hero & Smartphone Mockup
+│   ├── screenshot-1.png       # SchemeWise Hero & Smartphone Mockup
 │   └── screenshot-2.png       # 3-Stat Metric Cards & Category Grid
 │
 └── data/                      # Dataset Specifications & Schemas
