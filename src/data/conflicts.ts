@@ -60,5 +60,93 @@ export const MASTER_CONFLICTS: SchemeConflict[] = [
     officialCircularReference: 'Ministry of Finance (DFS) Credit Directive Ref. DFS/SUI-PMMY/2022 §3',
     consequence: 'Simultaneous application causes duplicate sanction alerts on the RBI CRILC/CIBIL commercial registry, leading to loan cancellation.',
     resolutionAdvice: 'For substantial greenfield enterprise setup with capital equipment (up to ₹1 Crore), select Stand-Up India. For immediate small working capital without extensive project reports, select Mudra.'
+  },
+  {
+    id: 'conflict_post_matric_vs_csss',
+    schemeIdA: 'post_matric_scholarship',
+    schemeIdB: 'central_sector_scholarship',
+    schemeAName: 'Post-Matric Scholarship for SC/ST/OBC Students',
+    schemeBName: 'Central Sector Scheme of Scholarship (CSSS)',
+    reason: 'Single Central Scholarship Directive: National Scholarship Portal (NSP) strictly restricts students from availing more than one scholarship from Central Ministries simultaneously.',
+    officialCircularReference: 'Ministry of Education & MoSJE Joint NSP Directive §4',
+    consequence: 'Duplicate scholarship application causes portal rejection during institute or state nodal officer verification.',
+    resolutionAdvice: 'The optimizer automatically selects the scholarship yielding higher financial benefit.'
+  },
+  {
+    id: 'conflict_post_matric_vs_yasasvi',
+    schemeIdA: 'post_matric_scholarship',
+    schemeIdB: 'pm_yasasvi',
+    schemeAName: 'Post-Matric Scholarship for SC/ST/OBC Students',
+    schemeBName: 'PM YASASVI Scholarship',
+    reason: 'Dual Beneficiary Restriction: Students cannot claim concurrent maintenance allowances from both PM-YASASVI and the standard Post-Matric scheme.',
+    officialCircularReference: 'MoSJE YASASVI Scheme Guidelines Clause 5.3',
+    consequence: 'NSP biometric de-duplication flags multiple disbursements to same Aadhaar-linked bank account.',
+    resolutionAdvice: 'Choose PM YASASVI if enrolled in top-class notified institutions; otherwise apply for regular Post-Matric.'
+  },
+  {
+    id: 'conflict_ebc_vs_post_matric_sc',
+    schemeIdA: 'ebc_rajarshi_shahu',
+    schemeIdB: 'post_matric_sc_mahadbt',
+    schemeAName: 'Rajarshi Chhatrapati Shahu Maharaj EBC Concession',
+    schemeBName: 'Post-Matric Scholarship for SC Students (MahaDBT)',
+    reason: 'Departmental Scheme Exclusivity: SC students are entitled to 100% full fee waiver under Social Welfare Dept Post-Matric, whereas EBC concession provides 50% for General category. MahaDBT system prevents cross-departmental duplicate application.',
+    officialCircularReference: 'Maharashtra Govt GR No. TEM-2018/CR-136/TE-4 & MahaDBT Portal Rule §3',
+    consequence: 'System rejects secondary scheme application during Aadhaar-seeded profile validation on MahaDBT.',
+    resolutionAdvice: 'The engine prioritizes Post-Matric SC which provides 100% full tuition waiver plus maintenance allowance.'
+  },
+  {
+    id: 'conflict_ebc_vs_obc_pms',
+    schemeIdA: 'ebc_rajarshi_shahu',
+    schemeIdB: 'obc_post_matric_mahadbt',
+    schemeAName: 'Rajarshi Chhatrapati Shahu Maharaj EBC Concession',
+    schemeBName: 'Post-Matric Scholarship for OBC Students (MahaDBT)',
+    reason: 'Category Quota Conflict: OBC students must apply under the VJNT, OBC & SBC Welfare Department rather than the General EBC scheme.',
+    officialCircularReference: 'MahaDBT Higher & Technical Education Guidelines §8',
+    consequence: 'Application returned with deficiency query by College Scrutiny Officer.',
+    resolutionAdvice: 'The engine selects OBC Post-Matric scholarship for eligible OBC candidates.'
+  },
+  {
+    id: 'conflict_sc_pms_vs_sc_freeship',
+    schemeIdA: 'post_matric_sc_mahadbt',
+    schemeIdB: 'sc_freeship_mahadbt',
+    schemeAName: 'Post-Matric Scholarship for SC Students (MahaDBT)',
+    schemeBName: 'Tuition and Examination Fees for SC Students (SC Freeship)',
+    reason: 'Income Tier Mutual Exclusivity: SC students with family income ≤ ₹2.5 Lakhs qualify for GoI Post-Matric with maintenance, while students with income between ₹2.5L and ₹8.0L qualify for State Freeship without maintenance.',
+    officialCircularReference: 'Ministry of Social Justice & Empowerment Post-Matric Guidelines & Maharashtra Social Justice Order',
+    consequence: 'Selecting both results in automatic rejection on MahaDBT due to income ceiling mismatch.',
+    resolutionAdvice: 'The engine evaluates exact parental income and selects the correct tier automatically.'
+  },
+  {
+    id: 'conflict_obc_pms_vs_obc_freeship',
+    schemeIdA: 'obc_post_matric_mahadbt',
+    schemeIdB: 'obc_freeship_mahadbt',
+    schemeAName: 'Post-Matric Scholarship for OBC Students (MahaDBT)',
+    schemeBName: 'Tuition Fees and Examination Fees for OBC Students (OBC Freeship)',
+    reason: 'Income Tier Mutual Exclusivity: Income under ₹1.5 Lakhs receives Post-Matric Scholarship + Maintenance; income between ₹1.5L and ₹8.0L receives 50% Freeship.',
+    officialCircularReference: 'VJNT, OBC & SBC Welfare Department Circular Ref. OBC-2021/Scheme-Rules',
+    consequence: 'Income certificate scrutiny mismatch triggers rejection by District Welfare Officer.',
+    resolutionAdvice: 'The engine auto-routes the student to the appropriate tier based on annual income.'
+  },
+  {
+    id: 'conflict_ebc_vs_minority_mh',
+    schemeIdA: 'ebc_rajarshi_shahu',
+    schemeIdB: 'state_minority_scholarship_mh',
+    schemeAName: 'Rajarshi Chhatrapati Shahu Maharaj EBC Concession',
+    schemeBName: 'State Minority Scholarship for Technical & Professional Courses (MH)',
+    reason: 'Dual Tuition Benefit Prohibition: A student cannot claim both General EBC tuition reimbursement and State Minority technical scholarship for the same academic year.',
+    officialCircularReference: 'Minority Development Department Maharashtra Resolution §5',
+    consequence: 'Second disbursement blocked during treasury bill preparation.',
+    resolutionAdvice: 'The engine compares course fee reimbursement under EBC vs flat ₹50,000 under Minority Scholarship to choose the maximum benefit.'
+  },
+  {
+    id: 'conflict_aicte_pragati_vs_csss',
+    schemeIdA: 'aicte_pragati',
+    schemeIdB: 'central_sector_scholarship',
+    schemeAName: 'AICTE Pragati Scholarship for Girls',
+    schemeBName: 'Central Sector Scheme of Scholarship (CSSS)',
+    reason: 'Single Central Scholarship Mandate: Ministry of Education guidelines restrict female technical students from drawing concurrent central scholarship awards via the National Scholarship Portal.',
+    officialCircularReference: 'NSP Unified Standard Operating Procedure §11',
+    consequence: 'NSP deduplication system blocks disbursement to the student\'s Aadhaar-linked bank account.',
+    resolutionAdvice: 'The engine recommends AICTE Pragati (₹50,000/yr) over CSSS (₹12,000/yr) for female technical students.'
   }
 ];

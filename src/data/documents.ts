@@ -125,5 +125,148 @@ export const MASTER_DOCUMENTS: Record<string, DocumentInfo> = {
     isImmediateDigital: false,
     prerequisites: ['aadhaar'],
     applicationPortal: 'https://www.swavlambancard.gov.in'
+  },
+  educational_marksheet: {
+    id: 'educational_marksheet',
+    name: 'Previous Year Marksheet (10th / 12th / Degree)',
+    category: 'Education',
+    issuingAuthority: 'State Education Board / University / Examination Authority',
+    description: 'Official marks memo verifying passing grade, percentage, and minimum qualification criteria.',
+    typicalProcessingDays: 0,
+    isImmediateDigital: true,
+    prerequisites: [],
+    applicationPortal: 'https://digilocker.gov.in'
+  },
+  caste_validity: {
+    id: 'caste_validity',
+    name: 'Caste Validity Certificate',
+    category: 'Caste & Category',
+    issuingAuthority: 'Divisional Caste Scrutiny Committee (Social Welfare Dept / BARTI / TRTI)',
+    description: 'Mandatory statutory scrutiny verification certificate confirming genuine caste claim for professional admissions and scholarships in Maharashtra.',
+    typicalProcessingDays: 21,
+    isImmediateDigital: false,
+    prerequisites: ['aadhaar', 'caste_certificate', 'leaving_certificate'],
+    applicationPortal: 'https://barti.maharashtra.gov.in'
+  },
+  non_creamy_layer: {
+    id: 'non_creamy_layer',
+    name: 'Non-Creamy Layer Certificate (NCL)',
+    category: 'Caste & Category',
+    issuingAuthority: 'Sub-Divisional Officer (SDO) / Tahsildar / Revenue Department',
+    description: 'Mandatory statutory certificate for OBC/VJNT/SBC students confirming family income does not exceed ₹8.0 Lakhs in preceding 3 financial years.',
+    typicalProcessingDays: 7,
+    isImmediateDigital: false,
+    prerequisites: ['aadhaar', 'income_certificate', 'caste_certificate'],
+    applicationPortal: 'https://aaplesarkar.maharashtra.gov.in'
+  },
+  cap_allotment_letter: {
+    id: 'cap_allotment_letter',
+    name: 'CAP Round Admission Allotment Letter',
+    category: 'Education',
+    issuingAuthority: 'State Common Entrance Test Cell (CET Cell) / Directorate of Technical Education',
+    description: 'Official Centralized Admission Process (CAP) allotment receipt proving merit-based admission into government/aided/un-aided college.',
+    typicalProcessingDays: 0,
+    isImmediateDigital: true,
+    prerequisites: ['educational_marksheet'],
+    applicationPortal: 'https://cetcell.mahacet.org'
+  },
+  hostel_certificate: {
+    id: 'hostel_certificate',
+    name: 'Hostel Warden Certificate / Rent Agreement',
+    category: 'Education',
+    issuingAuthority: 'College Hostel Rector / Registered Landlord & Notary',
+    description: 'Proof of residential stay in college hostel or private rented accommodation away from native district (for Swadhar and Panjabrao Deshmukh hostel allowances).',
+    typicalProcessingDays: 2,
+    isImmediateDigital: false,
+    prerequisites: ['student_id_bonafide'],
+    applicationPortal: 'https://mahadbt.maharashtra.gov.in'
+  },
+  alpabhudharak_certificate: {
+    id: 'alpabhudharak_certificate',
+    name: 'Marginal Farmer Certificate (Alpabhudharak Dakhla)',
+    category: 'Livelihood & Land',
+    issuingAuthority: 'Talathi / Tahsildar Office',
+    description: 'Official revenue document verifying parents hold small/marginal agricultural land (under 2 hectares) for Dr. Panjabrao Deshmukh hostel allowance.',
+    typicalProcessingDays: 5,
+    isImmediateDigital: false,
+    prerequisites: ['aadhaar', 'land_records_7_12'],
+    applicationPortal: 'https://aaplesarkar.maharashtra.gov.in'
+  },
+  fee_receipt: {
+    id: 'fee_receipt',
+    name: 'College Fee Receipt (Current Academic Year)',
+    category: 'Education',
+    issuingAuthority: 'College Accounts / Cashier Section',
+    description: 'Paid receipt specifying tuition fee, library fee, gymkhana fee, and development charges breakdown.',
+    typicalProcessingDays: 1,
+    isImmediateDigital: true,
+    prerequisites: ['student_id_bonafide'],
+    applicationPortal: 'https://mahadbt.maharashtra.gov.in'
+  },
+  leaving_certificate: {
+    id: 'leaving_certificate',
+    name: 'School / College Leaving Certificate (TC / LC)',
+    category: 'Education',
+    issuingAuthority: 'Headmaster / College Principal',
+    description: 'Transfer / Leaving certificate noting date of birth, mother tongue, religion, and caste entry.',
+    typicalProcessingDays: 1,
+    isImmediateDigital: false,
+    prerequisites: [],
+    applicationPortal: 'https://digilocker.gov.in'
+  },
+  mahadbt_registration: {
+    id: 'mahadbt_registration',
+    name: 'Aaple Sarkar MahaDBT Registered Profile',
+    category: 'Identity',
+    issuingAuthority: 'Maharashtra Information Technology Corporation (MahaIT)',
+    description: 'Verified student Aadhaar-authenticated user profile on Government of Maharashtra MahaDBT Portal.',
+    typicalProcessingDays: 1,
+    isImmediateDigital: true,
+    prerequisites: ['aadhaar', 'bank_passbook'],
+    applicationPortal: 'https://mahadbt.maharashtra.gov.in'
+  },
+  iti_admission_receipt: {
+    id: 'iti_admission_receipt',
+    name: 'Government ITI Admission & Enrollment Receipt',
+    category: 'Education',
+    issuingAuthority: 'Government Industrial Training Institute (DVET Maharashtra)',
+    description: 'Valid enrollment letter or fee receipt in a Government ITI under the Craftsman Training Scheme.',
+    typicalProcessingDays: 1,
+    isImmediateDigital: true,
+    prerequisites: ['student_id_bonafide'],
+    applicationPortal: 'https://admission.dvet.gov.in'
+  },
+  upsc_mpsc_admit_card_proof: {
+    id: 'upsc_mpsc_admit_card_proof',
+    name: 'UPSC / MPSC Stage Clearance Proof (Scorecard / Admit Card)',
+    category: 'Education',
+    issuingAuthority: 'Union Public Service Commission (UPSC) / MPSC',
+    description: 'Official roll number, scorecard or interview call letter confirming passing of Prelims / Mains / Interview stage.',
+    typicalProcessingDays: 0,
+    isImmediateDigital: true,
+    prerequisites: [],
+    applicationPortal: 'https://mpsc.gov.in'
+  },
+  freedom_fighter_certificate: {
+    id: 'freedom_fighter_certificate',
+    name: 'Freedom Fighter Dependent Certificate',
+    category: 'Identity',
+    issuingAuthority: 'District Collectorate / General Administration Dept (GoM)',
+    description: 'Sanad / Official recognition certificate of freedom fighter along with relationship declaration certificate.',
+    typicalProcessingDays: 15,
+    isImmediateDigital: false,
+    prerequisites: ['aadhaar', 'domicile_certificate'],
+    applicationPortal: 'https://aaplesarkar.maharashtra.gov.in'
+  },
+  attendance_undertaking: {
+    id: 'attendance_undertaking',
+    name: 'Student Attendance & Family Beneficiary Undertaking',
+    category: 'Education',
+    issuingAuthority: 'Self-Declaration / Verified by College Principal',
+    description: 'Signed affidavit confirming attendance criteria (≥50% for colleges, ≥80% for ITI) and compliance with maximum 2 siblings rule.',
+    typicalProcessingDays: 1,
+    isImmediateDigital: true,
+    prerequisites: ['student_id_bonafide'],
+    applicationPortal: 'https://mahadbt.maharashtra.gov.in'
   }
 };

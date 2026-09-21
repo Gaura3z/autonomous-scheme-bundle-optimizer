@@ -67,6 +67,26 @@ export interface CitizenProfile {
   enrolledInHigherEducation: boolean;
   pursuingApprenticeship: boolean;
   hasGirlChildUnder10: boolean;
+
+  // Student & Academic Specific Fields (Especially Maharashtra & Central Schemes)
+  isProfessionalCourse?: boolean;
+  isHosteller?: boolean;
+  isCapAdmitted?: boolean;
+  hasQualifyingExamAbove60?: boolean;
+  hasCasteValidity?: boolean;
+  hasNonCreamyLayer?: boolean;
+  isOrphanOrSingleParent?: boolean;
+  isItiStudent?: boolean;
+  hasClearedUpscOrMpscStage?: boolean;
+  isPreparingForUpscOrMpsc?: boolean;
+  isPreparingForEngineeringOrMedicalEntrance?: boolean;
+  isFreedomFighterChild?: boolean;
+  hasTenthMarksAbove75?: boolean;
+  hasTwelfthMathPhysicsAbove60?: boolean;
+  isEnrolledInPhd?: boolean;
+  isEnrolledInVidyaniketan?: boolean;
+  familyBeneficiaryCountUnderTwo?: boolean;
+  attendanceAboveFiftyPercent?: boolean;
 }
 
 export type AssessmentStage = 

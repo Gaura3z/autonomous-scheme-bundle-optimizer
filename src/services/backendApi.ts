@@ -57,7 +57,7 @@ export async function verifyWithBackend(
   declaredDocumentIds: string[],
   signal?: AbortSignal
 ): Promise<BackendAuditResponse> {
-  const baseUrl = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || 'http://127.0.0.1:8001';
+  const baseUrl = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || '';
   const response = await fetch(`${baseUrl}/api/v1/optimize`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

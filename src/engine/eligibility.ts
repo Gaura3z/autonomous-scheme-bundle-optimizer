@@ -87,6 +87,23 @@ export function evaluateScheme(scheme: Scheme, profile: CitizenProfile): SchemeE
     }
   }
 
+  // Academic and Demographic coherence guardrails
+  const isHighSchoolOrDiploma = ['Below 10th', '10th Pass', '12th Pass', 'Diploma'].includes(profile.educationLevel) || profile.age < 20;
+  const requiresPhd = (scheme.rules.all ?? []).some(r => r.field === 'isEnrolledInPhd') ||
+                      (scheme.rules.any ?? []).some(r => r.field === 'isEnrolledInPhd');
+  if (requiresPhd && (isHighSchoolOrDiploma || profile.isEnrolledInPhd === false)) {
+    unmetReasons.push(`Requires active Ph.D./doctoral research registration (Not applicable for ${profile.educationLevel})`);
+  }
+
+  const requiresCivilServices = (scheme.rules.all ?? []).some(r => r.field === 'isPreparingForUpscOrMpsc' || r.field === 'hasClearedUpscOrMpscStage');
+  if (requiresCivilServices && (isHighSchoolOrDiploma || profile.isPreparingForUpscOrMpsc === false || profile.hasClearedUpscOrMpscStage === false)) {
+    unmetReasons.push('Requires graduate-level UPSC/MPSC competitive civil services examination pathway');
+  }
+
+  if (scheme.rules.all?.some(r => r.field === 'isFarmer') && !profile.isFarmer) {
+    unmetReasons.push('Applicant profile does not indicate an agricultural farmer occupation');
+  }
+
   // Check exclusion rules first (Hard Negative Rules)
   if (scheme.rules.exclusionRules) {
     for (const rule of scheme.rules.exclusionRules) {

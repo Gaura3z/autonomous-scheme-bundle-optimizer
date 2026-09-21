@@ -18,6 +18,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { CitizenProfile, AdaptiveQuestion, Scheme } from '../../types';
 import { planAdaptiveQuestions } from '../../engine/questions';
+import { VoiceGuideBanner } from '../common/VoiceGuideBanner';
+import { MobileStickyFooter } from '../common/MobileStickyFooter';
 
 interface AdaptiveQuestionnaireProps {
   profile: CitizenProfile;
@@ -67,7 +69,17 @@ export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-12 pb-24 sm:pb-12">
+      {/* Voice Guide Banner */}
+      <VoiceGuideBanner
+        stepNumber={2}
+        totalSteps={6}
+        title="Eligibility Verification Questions"
+        guidanceText="Answer these quick targeted questions regarding CAP admission, attendance, and merit marks to confirm your 100% fee waiver and state scholarships under Government of Maharashtra resolutions."
+        marathiText="कॅप प्रवेश, उपस्थिती आणि गुणांबद्दलच्या या प्रश्नांची उत्तरे द्या जेणेकरून १००% फी माफी आणि शिष्यवृत्ती निश्चित करता येईल."
+        showScrollHint={false}
+      />
+
       {/* Questionnaire Progress */}
       <div className="mb-6 flex items-center justify-between text-xs text-slate-500">
           <span className="font-semibold text-blue-700 uppercase tracking-wider">
@@ -200,6 +212,16 @@ export const AdaptiveQuestionnaire: React.FC<AdaptiveQuestionnaireProps> = ({
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Mobile Sticky Action Footer */}
+      <MobileStickyFooter
+        currentStep={2}
+        totalSteps={6}
+        nextStepLabel={isLastQuestion ? 'Complete Verification →' : 'Next Question →'}
+        onNext={handleNext}
+        onBack={handlePrevious}
+        backLabel="Back"
+      />
     </div>
   );
 };

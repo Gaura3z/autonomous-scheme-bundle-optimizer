@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { DocumentInfo, Scheme } from '../../types';
 import { planDocumentRequests } from '../../engine/documents';
+import { VoiceGuideBanner } from '../common/VoiceGuideBanner';
+import { MobileStickyFooter } from '../common/MobileStickyFooter';
 
 interface DocumentChecklistProps {
   bundleSchemes: Scheme[];
@@ -54,11 +56,21 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-10 pb-24 sm:pb-10">
+      {/* Voice Guide Banner */}
+      <VoiceGuideBanner
+        stepNumber={3}
+        totalSteps={6}
+        title="Document Inventory Check"
+        guidanceText="Select the certificates you already hold (like Aadhaar, Domicile, or Income Certificate). Our optimizer will separate schemes you can apply for immediately today versus documents you need to procure first."
+        marathiText="तुमच्याकडे सध्या उपलब्ध असलेले दाखले (उदा. आधार, डोमिसाईल, उत्पन्न दाखला) निवडा. सिस्टीम तुम्हाला लगेच अर्ज करता येणाऱ्या योजना वेगळ्या करून दाखवेल."
+        showScrollHint={true}
+      />
+
       {/* Header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider">
-          Stage 5 • Quick Document Check
+          Step 3 of 6 • Quick Document Check
         </span>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
           Which required documents do you already have?
@@ -179,10 +191,20 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
           onClick={onProceedToReadiness}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-900/20 transition-all hover:translate-x-0.5 cursor-pointer"
         >
-          Continue to conflict-safe bundle
+          Run Autonomous Optimizer Solver
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Mobile Sticky Action Footer */}
+      <MobileStickyFooter
+        currentStep={3}
+        totalSteps={6}
+        nextStepLabel="Run Optimizer Solver →"
+        onNext={onProceedToReadiness}
+        onBack={onBackToBundle}
+        backLabel="Back"
+      />
     </div>
   );
 };

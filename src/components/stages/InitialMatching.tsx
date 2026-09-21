@@ -1,23 +1,29 @@
 /**
- * Page 3: Initial Scheme Candidate Matching
- * Shows candidate welfare opportunities that match the initial profile.
- * Clarifies these are CANDIDATE matches, not final confirmations.
+ * Stage 2 Transition: Automated Candidate Matching & Radar Redirect
+ * 
+ * IMPORTANT UX FIX FOR STUDENTS & MOBILE USERS:
+ * Instead of showing raw, unverified scheme cards (which misled students into
+ * thinking the assessment was complete and stopped them from continuing), this
+ * view provides a high-energy animated transition that clearly communicates:
+ * 1. Your profile was analyzed and candidate schemes were found.
+ * 2. You are now automatically moving to the quick verification questions
+ *    to confirm your 100% fee waiver and calculate your final bundle.
+ * 
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
-  CheckCircle, 
-  HelpCircle, 
-  ArrowRight, 
   Sparkles, 
+  ArrowRight, 
+  ShieldCheck, 
   Layers, 
-  Building2, 
-  ChevronRight,
-  ShieldAlert
+  CheckCircle2, 
+  GraduationCap,
+  Loader2,
+  Clock
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Scheme, CitizenProfile } from '../../types';
-import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
 
 interface InitialMatchingProps {
   candidates: Scheme[];
@@ -32,126 +38,128 @@ export const InitialMatching: React.FC<InitialMatchingProps> = ({
   onContinue,
   onBackToProfile
 }) => {
+  const [countdownProgress, setCountdownProgress] = useState(0);
+
+  // Auto-redirect to questionnaire after 2.0 seconds with smooth visual progress
+  useEffect(() => {
+    const intervalTime = 30;
+    const totalTime = 2000;
+    const increment = (intervalTime / totalTime) * 100;
+
+    const timer = setInterval(() => {
+      setCountdownProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          onContinue();
+          return 100;
+        }
+        return prev + increment;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [onContinue]);
+
+  const maharashtraSpecificCount = candidates.filter(
+    (c) => (c.targetStates && c.targetStates.includes('MH')) || c.jurisdiction === 'State-Specific'
+  ).length;
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 sm:py-10">
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mb-8"
+    <div className="max-w-2xl mx-auto px-4 py-8 sm:py-16">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-xl text-center relative overflow-hidden"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-            Stage 2 • Candidate Matching
-          </span>
-          <span className="text-xs text-slate-500">•</span>
-          <span className="text-xs font-medium text-slate-600">
-            {candidates.length} Candidate Opportunities Found
-          </span>
-        </div>
+        {/* Decorative ambient gradient backdrop */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-60 pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-emerald-100 rounded-full blur-3xl opacity-60 pointer-events-none" />
 
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-          Schemes that may be relevant to you
-        </h2>
-
-        {/* Disclaimer Callout */}
-        <div className="mt-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-          <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-900 leading-relaxed">
-            <strong>Preliminary Screening Notice:</strong> These schemes match your primary demographic and occupational profile. They are <em>candidate schemes</em>, not confirmed eligibility. Answering a few quick adaptive questions in the next step will deterministically verify your exact qualification and detect any statutory conflicts.
+        {/* Pulse radar animation ring */}
+        <div className="relative z-10 mx-auto mb-6 w-24 h-24 flex items-center justify-center">
+          <motion.div 
+            className="absolute inset-0 rounded-full bg-blue-600/10 border border-blue-600/20"
+            animate={{ scale: [1, 1.35, 1], opacity: [0.7, 0.15, 0.7] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div 
+            className="absolute -inset-3 rounded-full bg-indigo-600/10 border border-indigo-600/20"
+            animate={{ scale: [1, 1.55, 1], opacity: [0.5, 0.1, 0.5] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+          />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-600/30 text-white">
+            <GraduationCap className="w-8 h-8" />
           </div>
         </div>
-      </motion.div>
 
-      {/* Candidate Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        {candidates.map((scheme, idx) => (
-          <motion.div
-            key={scheme.id}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: Math.min(idx * 0.05, 0.4) }}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:border-blue-400 hover:shadow-md transition-all flex flex-col justify-between"
-          >
-            <div>
-              {/* Category & Jurisdiction badges */}
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                  {scheme.category}
-                </span>
+        {/* Stage Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200/60 mb-3">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+          <span>Profile Matched Successfully</span>
+        </div>
 
-                <SchemeJurisdictionBadge jurisdiction={scheme.jurisdiction} />
-              </div>
+        {/* Dynamic Title */}
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+          Found {candidates.length} Candidate Welfare Opportunities
+        </h2>
 
-              {/* Title & Tagline */}
-              <h3 className="font-bold text-slate-900 text-base mb-1 leading-snug">
-                {scheme.name}
-              </h3>
-              <p className="text-xs text-slate-600 line-clamp-2 mb-3">
-                {scheme.tagline}
-              </p>
+        <p className="text-sm text-slate-600 max-w-lg mx-auto mb-6 leading-relaxed">
+          Identified <strong className="text-blue-900">{maharashtraSpecificCount} Maharashtra State</strong> and <strong className="text-blue-900">{candidates.length - maharashtraSpecificCount} Central Government</strong> opportunities matching your age, education, and social category.
+        </p>
 
-              {/* Potential Benefit Highlight */}
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-3">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block mb-0.5">
-                  Potential Benefit Preview
-                </span>
-                <span className="text-sm font-extrabold text-blue-900">
-                  {scheme.benefit.displayAmount}
-                </span>
-              </div>
+        {/* Verification Checklist Indicator */}
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 mb-6 text-left max-w-lg mx-auto space-y-2.5">
+          <div className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-blue-600" />
+            <span>Automatic Next Step</span>
+          </div>
 
-              {/* Ministry & Verification */}
-              <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mb-1">
-                <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span className="truncate">{scheme.ministry}</span>
-              </div>
-            </div>
+          <div className="flex items-center gap-2.5 text-xs font-medium text-emerald-800">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Age, Domicile ({profile.state}) & Social Category Filtered</span>
+          </div>
 
-            {/* Card Footer status */}
-            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                Needs a few more answers
-              </span>
+          <div className="flex items-center gap-2.5 text-xs font-medium text-slate-700">
+            <Loader2 className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
+            <span>Redirecting to verify CAP Admission, Female 100% Waiver & Marks...</span>
+          </div>
+        </div>
 
-              <span className="text-xs text-slate-400">
-                {scheme.requiredDocumentIds.length} doc(s) needed
-              </span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+        {/* Countdown / Progress Bar */}
+        <div className="w-full max-w-md mx-auto mb-6">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5 font-medium">
+            <span>Entering Step 2 of 6: Eligibility Verification</span>
+            <span>{Math.round(countdownProgress)}%</span>
+          </div>
+          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/70 p-0.5">
+            <motion.div
+              className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-full transition-all duration-75"
+              style={{ width: `${countdownProgress}%` }}
+            />
+          </div>
+        </div>
 
-      {/* Navigation Actions */}
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4"
-      >
-        <motion.button
-          type="button"
-          onClick={onBackToProfile}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="text-xs font-semibold text-slate-600 hover:text-slate-900 py-2 px-4 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
-        >
-          ← Edit Profile Details
-        </motion.button>
-
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
           <motion.button
+            type="button"
             onClick={onContinue}
-            whileHover={{ scale: 1.03, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-900/20 transition-colors cursor-pointer"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm shadow-md shadow-blue-900/20 cursor-pointer transition-all"
           >
-            Continue Assessment ({candidates.length} candidate schemes)
+            <span>Verify Eligibility Questions Now</span>
             <ArrowRight className="w-4 h-4" />
           </motion.button>
+
+          <button
+            type="button"
+            onClick={onBackToProfile}
+            className="text-xs font-medium text-slate-500 hover:text-slate-800 py-2 px-3 transition-colors cursor-pointer"
+          >
+            ← Modify Profile Details
+          </button>
         </div>
       </motion.div>
     </div>

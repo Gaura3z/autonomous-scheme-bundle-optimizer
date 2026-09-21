@@ -274,5 +274,87 @@ export const ADDITIONAL_SCHEMES: Scheme[] = [
     benefit: { type: 'Hybrid', monetaryValueAnnualPaise: 0, displayAmount: 'Irrigation support varies by component and state', frequency: 'Coverage' },
     requiredDocumentIds: ['aadhaar', 'land_records_7_12', 'bank_passbook'],
     rules: all(rule('isFarmer', 'eq', 'Applicant must identify as a farmer', true), rule('landholdingHectares', 'gte', 'Agricultural land information must be available', 0.1, 0.1))
+  }),
+  centralScheme({
+    id: 'pm_vidya_lakshmi', code: 'PM-VIDYA-LAKSHMI', name: 'PM Vidya Lakshmi Yojana (Higher Education Interest Subsidy)', shortName: 'PM Vidya Lakshmi',
+    tagline: 'Education loan access with 100% full interest subsidy during course & moratorium period',
+    description: 'Single window electronic platform for students seeking education loans and Central Sector Interest Subsidy (CSIS) under Ministry of Education for higher education in India.',
+    category: 'Education & Skill', ministry: 'Ministry of Education',
+    officialSourceUrl: 'https://www.vidyalakshmi.co.in/',
+    benefit: { type: 'Hybrid', monetaryValueAnnualPaise: 4500000, displayAmount: '100% Interest Subsidy on Higher Ed Loan (up to ₹10 Lakhs)', frequency: 'Annual', nonMonetaryDescription: 'Interest waiver during course duration plus one year moratorium period.' },
+    requiredDocumentIds: ['aadhaar', 'student_id_bonafide', 'income_certificate', 'bank_passbook'],
+    rules: all(rule('isStudent', 'eq', 'Applicant must be an active student', true), rule('enrolledInHigherEducation', 'eq', 'Applicant must be enrolled in higher education', true), rule('annualFamilyIncome', 'lte', 'Family annual income must be under ₹4.5 Lakhs for interest subsidy', undefined, undefined, 450000))
+  }),
+  centralScheme({
+    id: 'nmms_scholarship', code: 'NMMSS', name: 'National Means-cum-Merit Scholarship Scheme', shortName: 'NMMS Scholarship',
+    tagline: '₹12,000 annual scholarship for meritorious school students from low-income families',
+    description: 'Centrally sponsored scholarship to assist meritorious secondary school students from economically weaker sections to continue their education from Class IX to XII.',
+    category: 'Education & Skill', ministry: 'Ministry of Education',
+    officialSourceUrl: 'https://scholarships.gov.in/',
+    benefit: { type: 'Monetary', monetaryValueAnnualPaise: 1200000, displayAmount: '₹12,000 / year (₹1,000 / month direct transfer)', frequency: 'Annual' },
+    requiredDocumentIds: ['aadhaar', 'student_id_bonafide', 'income_certificate', 'bank_passbook'],
+    rules: all(rule('isStudent', 'eq', 'Applicant must be an active student', true), rule('annualFamilyIncome', 'lte', 'Family annual income must be under ₹3.5 Lakhs', undefined, undefined, 350000)),
+    conflictingSchemeIds: ['post_matric_scholarship', 'central_sector_scholarship']
+  }),
+  centralScheme({
+    id: 'pm_yasasvi', code: 'PM-YASASVI', name: 'PM Young Achievers Scholarship for Vibrant India (YASASVI)', shortName: 'PM YASASVI',
+    tagline: '₹75,000 to ₹1,25,000 annual top-class scholarship for OBC, EBC, and DNT students',
+    description: 'Prestigious scholarship award scheme by Ministry of Social Justice and Empowerment for OBC, Economically Backward Class (EBC), and De-notified Tribes (DNT) students in top schools and colleges.',
+    category: 'Education & Skill', ministry: 'Ministry of Social Justice and Empowerment',
+    officialSourceUrl: 'https://yet.nta.ac.in/',
+    benefit: { type: 'Monetary', monetaryValueAnnualPaise: 7500000, displayAmount: '₹75,000 - ₹1,25,000 / year Top Class Scholarship', frequency: 'Annual' },
+    requiredDocumentIds: ['aadhaar', 'caste_certificate', 'student_id_bonafide', 'income_certificate', 'bank_passbook'],
+    rules: all(rule('isStudent', 'eq', 'Applicant must be an active student', true), rule('socialCategory', 'eq', 'Applicant must belong to OBC category', 'OBC'), rule('annualFamilyIncome', 'lte', 'Annual family income must not exceed ₹2.5 Lakhs', undefined, undefined, 250000)),
+    conflictingSchemeIds: ['post_matric_scholarship', 'central_sector_scholarship']
+  }),
+  centralScheme({
+    id: 'shreshta_scheme', code: 'SHRESHTA', name: 'Scheme for Residential Education for Students in High Schools (SHRESHTA)', shortName: 'SHRESHTA Scheme',
+    tagline: '100% free residential education in top CBSE private boarding schools for SC students',
+    description: 'Enables meritorious Scheduled Caste students to gain admission into reputed CBSE-affiliated residential private schools with all tuition, boarding, and mess fees paid by Central Government.',
+    category: 'Education & Skill', ministry: 'Ministry of Social Justice and Empowerment',
+    officialSourceUrl: 'https://shreshta.nta.nic.in/',
+    benefit: { type: 'Hybrid', monetaryValueAnnualPaise: 10000000, displayAmount: '100% Free Top Boarding School Education (~₹1 Lakh/yr value)', frequency: 'Annual', nonMonetaryDescription: 'All tuition fees, hostel expenses, uniforms, and textbooks covered.' },
+    requiredDocumentIds: ['aadhaar', 'caste_certificate', 'student_id_bonafide', 'income_certificate'],
+    rules: all(rule('isStudent', 'eq', 'Applicant must be an active student', true), rule('socialCategory', 'eq', 'Must belong to Scheduled Caste', 'SC'), rule('annualFamilyIncome', 'lte', 'Annual family income under ₹2.5 Lakhs', undefined, undefined, 250000))
+  }),
+  centralScheme({
+    id: 'pm_yuva', code: 'PM-YUVA', name: 'PM YUVA Mentorship Scheme for Young Authors', shortName: 'PM YUVA Authors',
+    tagline: 'Mentorship and ₹50,000/month scholarship for young authors below 30 years',
+    description: 'National book promotion initiative under Ministry of Education to train young and aspiring authors under 30 years with mentorship by National Book Trust and publication royalties.',
+    category: 'Education & Skill', ministry: 'Ministry of Education',
+    officialSourceUrl: 'https://www.nbtindia.gov.in/',
+    benefit: { type: 'Monetary', monetaryValueAnnualPaise: 30000000, displayAmount: '₹50,000 / month for 6 months (₹3,00,000 Fellowship)', frequency: 'One-Time' },
+    requiredDocumentIds: ['aadhaar', 'bank_passbook'],
+    rules: all(rule('age', 'between', 'Author age must be between 16 and 30 years', undefined, 16, 30))
+  }),
+  centralScheme({
+    id: 'mgnrega', code: 'MGNREGA', name: 'Mahatma Gandhi National Rural Employment Guarantee Scheme', shortName: 'MGNREGA',
+    tagline: '100 days of legally guaranteed wage employment per financial year for rural households',
+    description: 'Statutory rights-based employment guarantee providing at least 100 days of unskilled manual wage work to adult members of any rural household.',
+    category: 'Business & Self-Employment', ministry: 'Ministry of Rural Development',
+    officialSourceUrl: 'https://nrega.nic.in/',
+    benefit: { type: 'Monetary', monetaryValueAnnualPaise: 2600000, displayAmount: '₹26,000 / year (100 Days Guaranteed Wage Direct Benefit)', frequency: 'Annual' },
+    requiredDocumentIds: ['aadhaar', 'bank_passbook', 'ration_card'],
+    rules: all(rule('areaType', 'eq', 'Applicant must reside in a rural area', 'Rural'), rule('age', 'gte', 'Must be an adult of working age', undefined, 18))
+  }),
+  centralScheme({
+    id: 'pm_sym', code: 'PM-SYM', name: 'Pradhan Mantri Shram Yogi Maan-dhan', shortName: 'PM Shram Yogi Maan-dhan',
+    tagline: 'Assured ₹3,000/month life-long pension after age 60 for unorganised workers',
+    description: 'Central sector pension scheme for unorganised workers (home-based workers, rickshaw pullers, construction workers, etc.) with 50:50 government matching contribution.',
+    category: 'Health & Social Security', ministry: 'Ministry of Labour & Employment',
+    officialSourceUrl: 'https://maandhan.in/',
+    benefit: { type: 'Monetary', monetaryValueAnnualPaise: 3600000, displayAmount: 'Guaranteed ₹36,000 / year (₹3,000 / month post-60 pension)', frequency: 'Annual' },
+    requiredDocumentIds: ['aadhaar', 'bank_passbook'],
+    rules: all(rule('age', 'between', 'Entry age must be between 18 and 40 years', undefined, 18, 40), rule('annualFamilyIncome', 'lte', 'Family annual income must not exceed ₹1,80,000', undefined, undefined, 180000))
+  }),
+  centralScheme({
+    id: 'pm_cares_children', code: 'PM-CARES-CHILDREN', name: 'PM CARES for Children Scheme', shortName: 'PM CARES for Children',
+    tagline: '₹10 Lakh corpus fund + free schooling, higher ed loan interest & PM-JAY health cover',
+    description: 'Comprehensive rehabilitation mission for children who lost both biological or adoptive parents, ensuring holistic support through schooling, higher education loan interest subvention, and corpus endowment.',
+    category: 'Women & Child Welfare', ministry: 'Ministry of Women and Child Development',
+    officialSourceUrl: 'https://pmcaresforchildren.in/',
+    benefit: { type: 'Hybrid', monetaryValueAnnualPaise: 10000000, displayAmount: '₹10 Lakh Endowment Corpus + Full Education & Health Cover', frequency: 'One-Time' },
+    requiredDocumentIds: ['aadhaar', 'bank_passbook'],
+    rules: all(rule('age', 'lte', 'Eligible until age 23', undefined, undefined, 23))
   })
 ];

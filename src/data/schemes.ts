@@ -5,6 +5,7 @@
  */
 import { Scheme } from '../types';
 import { ADDITIONAL_SCHEMES } from './additionalSchemes';
+import { MAHARASHTRA_STUDENT_SCHEMES } from './maharashtraStudentSchemes';
 
 export const CATALOG_VERSION = 'v2026.2-PS16';
 
@@ -641,7 +642,8 @@ const CURATED_SCHEMES: Scheme[] = [
       }
     ]
   },
-  ...ADDITIONAL_SCHEMES
+  ...ADDITIONAL_SCHEMES,
+  ...MAHARASHTRA_STUDENT_SCHEMES
 ];
 
 // This is deliberately labelled as a planning window. It is not presented as

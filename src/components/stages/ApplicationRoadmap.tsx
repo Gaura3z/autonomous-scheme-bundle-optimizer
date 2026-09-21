@@ -24,22 +24,36 @@ import {
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RoadmapStep } from '../../types';
+import { RoadmapStep, CitizenProfile, OptimizedBundle } from '../../types';
+import { VoiceGuideBanner } from '../common/VoiceGuideBanner';
+import { MobileStickyFooter } from '../common/MobileStickyFooter';
+import { StatutoryDisclaimerModal } from '../common/StatutoryDisclaimerModal';
+import { PaymentCheckoutModal } from '../common/PaymentCheckoutModal';
+import { downloadRoadmapPdfFile, safePrintOrDownloadRoadmap } from '../../services/roadmapPdf';
 
 interface ApplicationRoadmapProps {
   steps: RoadmapStep[];
+  profile?: CitizenProfile;
+  bundle?: OptimizedBundle;
   onProceedToSummary: () => void;
   onBackToDependencies: () => void;
 }
 
 export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
   steps: initialSteps,
+  profile,
+  bundle,
   onProceedToSummary,
   onBackToDependencies
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
   const [activePhaseFilter, setActivePhaseFilter] = useState<string>('ALL');
   const [copiedNotification, setCopiedNotification] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [hasPaidPro, setHasPaidPro] = useState(() => {
+    return localStorage.getItem('schemewise_pro_paid') === 'true';
+  });
 
   const toggleStep = (stepId: string) => {
     setCompletedSteps((prev) => ({
@@ -134,9 +148,52 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  // Export as PDF using browser print engine formatted with @media print stylesheet
-  const handleExportPDF = () => {
-    window.print();
+  // Fallback profile if not passed
+  const effectiveProfile: CitizenProfile = profile || {
+    state: 'MH',
+    socialCategory: 'General',
+    age: 20,
+    gender: 'Male',
+    annualFamilyIncome: 250000,
+    educationLevel: 'Undergraduate',
+    employmentStatus: 'Student',
+    isStudent: true,
+    isMinority: false,
+    hasDisability: false,
+    hasBPLCard: false,
+    areaType: 'Urban',
+    hasCasteValidity: false,
+    hasNonCreamyLayer: false,
+    isOrphan: false,
+    isFarmer: false,
+    isLandlessLabour: false,
+    isConstructionWorker: false,
+    isStreetVendor: false,
+    isHosteller: false,
+    isWomanEntrepreneur: false
+  };
+
+  // Direct, rock-solid PDF generation and file download using pdf-lib
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      await downloadRoadmapPdfFile(initialSteps, effectiveProfile, bundle);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      // Fallback to offline text download if error occurs
+      handleExportTextFile();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  // Safe Print with auto-fallback to direct PDF download
+  const handlePrintOrPdf = async () => {
+    try {
+      await safePrintOrDownloadRoadmap(initialSteps, effectiveProfile, bundle);
+    } catch (err) {
+      await handleDownloadPDF();
+    }
   };
 
   // Quick Share / Copy Text summary to clipboard
@@ -172,6 +229,18 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
         </div>
       </div>
 
+      {/* Civic Voice & Step Guide Banner */}
+      <div className="print:hidden mb-6">
+        <VoiceGuideBanner
+          stepNumber={6}
+          totalSteps={6}
+          title="Official Application Roadmap & Portals"
+          guidanceText="Follow this chronological checklist to file your applications on the MahaDBT and National Scholarship Portals before deadlines. Tap 'Save Offline' or 'Print PDF' to keep this action plan on your phone."
+          marathiText="हा तुमचा अंतिम अर्ज करण्याचा रोडमॅप आहे. दिलेल्या मुदतीपूर्वी महाडीबीटी आणि राष्ट्रीय पोर्टलवर अर्ज करण्यासाठी ही क्रमवारी वापरा."
+          showScrollHint={true}
+        />
+      </div>
+
       {/* Screen Header */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
@@ -182,7 +251,7 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider">
-              Stage 10 • Application Action Plan
+              Step 6 of 6 • Application Action Plan
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
               Your Application Roadmap
@@ -195,21 +264,44 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
           {/* Export & Actions Toolbar */}
           <div className="flex flex-wrap items-center gap-2 print:hidden shrink-0">
             <button
-              onClick={handleExportPDF}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
-              title="Print or Save as PDF"
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPdf}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-60"
+              title="Download Official Verified PDF Document"
             >
-              <Printer className="w-4 h-4 text-blue-800" />
-              <span>Print / Save PDF</span>
+              {isGeneratingPdf ? (
+                <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              ) : (
+                <FileText className="w-3.5 h-3.5 text-blue-200" />
+              )}
+              <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
+            </button>
+
+            <button
+              onClick={handlePrintOrPdf}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              title="Print Roadmap or Save as PDF"
+            >
+              <Printer className="w-4 h-4 text-slate-700" />
+              <span>Print</span>
+            </button>
+
+            <button
+              onClick={() => setIsPaymentModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-amber-900 text-xs font-bold shadow-2xs transition-all cursor-pointer"
+              title="Activate Assisted Filing & Verified Application Pass"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+              <span>{hasPaidPro ? 'Assisted Filing Pass Active' : 'Fast-Track Assisted Filing (₹49)'}</span>
             </button>
 
             <button
               onClick={handleExportTextFile}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-900 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition-colors cursor-pointer"
               title="Download clean offline text file"
             >
-              <Download className="w-4 h-4 text-blue-700" />
-              <span>Save Offline (.TXT)</span>
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>.TXT</span>
             </button>
 
             <button
@@ -224,6 +316,11 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
               )}
             </button>
           </div>
+        </div>
+
+        {/* Statutory Legal Disclaimer & Terms Banner */}
+        <div className="mt-4">
+          <StatutoryDisclaimerModal />
         </div>
 
         {/* Interactive Progress & Phase Filter Bar */}
@@ -442,6 +539,25 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Mobile Sticky Action Footer */}
+      <MobileStickyFooter
+        currentStep={6}
+        totalSteps={6}
+        nextStepLabel="View Final Summary & Why →"
+        onNext={onProceedToSummary}
+        onBack={onBackToDependencies}
+        backLabel="Back"
+      />
+
+      {/* Fast-Track Payment Modal */}
+      <PaymentCheckoutModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentSuccess={() => {
+          setHasPaidPro(true);
+        }}
+      />
     </div>
   );
 };

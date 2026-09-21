@@ -121,7 +121,7 @@ export function AdminPortal({ onExit }: { onExit: () => void }) {
     const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
     anchor.href = url; anchor.download = 'ps16-scheme-registry.json'; anchor.click(); URL.revokeObjectURL(url);
   };
-  const apiBase = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || 'http://127.0.0.1:8001';
+  const apiBase = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || '';
   const signIn = async (event: React.FormEvent) => {
     event.preventDefault(); setLoginError('');
     try {

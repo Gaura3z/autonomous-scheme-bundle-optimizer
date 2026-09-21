@@ -33,7 +33,42 @@ export function planAdaptiveQuestions(
   });
 
   const contextualFields = new Set<string>();
-  if (profile.isStudent || profile.educationLevel === 'Undergraduate' || profile.educationLevel === 'Postgraduate') contextualFields.add('enrolledInHigherEducation');
+  const isHighSchoolOrJuniorCollege = ['Below 10th', '10th Pass', '12th Pass', 'Diploma'].includes(profile.educationLevel) || profile.age < 20;
+
+  if (profile.isStudent || profile.educationLevel === 'Undergraduate' || profile.educationLevel === 'Postgraduate' || isHighSchoolOrJuniorCollege) {
+    contextualFields.add('enrolledInHigherEducation');
+    contextualFields.add('isProfessionalCourse');
+    contextualFields.add('isHosteller');
+    contextualFields.add('isCapAdmitted');
+    contextualFields.add('hasQualifyingExamAbove60');
+    if (['OBC', 'SC', 'ST'].includes(profile.socialCategory)) {
+      contextualFields.add('hasCasteValidity');
+    }
+    if (['OBC'].includes(profile.socialCategory)) {
+      contextualFields.add('hasNonCreamyLayer');
+    }
+    contextualFields.add('isOrphanOrSingleParent');
+    contextualFields.add('isItiStudent');
+    contextualFields.add('familyBeneficiaryCountUnderTwo');
+    contextualFields.add('attendanceAboveFiftyPercent');
+    contextualFields.add('hasTwelfthMathPhysicsAbove60');
+    if (profile.socialCategory === 'SC' || profile.age <= 20) {
+      contextualFields.add('hasTenthMarksAbove75');
+    }
+    contextualFields.add('isFreedomFighterChild');
+    contextualFields.add('isPreparingForEngineeringOrMedicalEntrance');
+  }
+
+  // Only ask Ph.D. question if citizen has reached Post-Graduate level or is older scholar (>= 22 yrs)
+  if (!isHighSchoolOrJuniorCollege && (profile.educationLevel === 'Postgraduate' || profile.age >= 23)) {
+    contextualFields.add('isEnrolledInPhd');
+  }
+
+  // Only ask UPSC/MPSC questions if candidate has completed or is in senior graduation and is within civil services age (21 - 38)
+  if (!isHighSchoolOrJuniorCollege && profile.age >= 21 && profile.age <= 38 && (profile.isStudent || profile.employmentStatus === 'Unemployed')) {
+    contextualFields.add('isPreparingForUpscOrMpsc');
+    contextualFields.add('hasClearedUpscOrMpscStage');
+  }
   if (profile.gender === 'Female' && ['Self-Employed', 'Unemployed'].includes(profile.employmentStatus)) contextualFields.add('isWomanEntrepreneur');
   if (profile.age >= 16 && profile.age <= 35 && !profile.isFarmer) contextualFields.add('pursuingApprenticeship');
   if ((profile.gender === 'Female' || profile.maritalStatus === 'Married') && !profile.isStudent && !profile.isFarmer) contextualFields.add('hasGirlChildUnder10');

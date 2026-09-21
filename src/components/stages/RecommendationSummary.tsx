@@ -4,7 +4,7 @@
  * and what trade-offs the optimizer made, with Print / Export support.
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Printer, 
   RotateCcw, 
@@ -20,13 +20,17 @@ import {
   Download,
   Calendar,
   ArrowLeft,
-  FileCheck2
+  FileCheck2,
+  FileText
 } from 'lucide-react';
 import { OptimizedBundle, SchemeEvaluation, CitizenProfile, RoadmapStep } from '../../types';
 import { BackendAuditCard } from './BackendAuditCard';
 import { CATALOG_VERSION } from '../../data/schemes';
 import { MASTER_DOCUMENTS } from '../../data/documents';
 import { getBundleValidity } from '../../engine/validity';
+import { StatutoryDisclaimerModal } from '../common/StatutoryDisclaimerModal';
+import { PaymentCheckoutModal } from '../common/PaymentCheckoutModal';
+import { downloadRoadmapPdfFile, safePrintOrDownloadRoadmap } from '../../services/roadmapPdf';
 
 interface RecommendationSummaryProps {
   profile: CitizenProfile;
@@ -49,8 +53,30 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
   onOpenDemoSelector,
   onBackToRoadmap
 }) => {
-  const handlePrint = () => {
-    window.print();
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [hasPaidPro, setHasPaidPro] = useState(() => {
+    return localStorage.getItem('schemewise_pro_paid') === 'true';
+  });
+
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      await downloadRoadmapPdfFile(roadmapSteps, profile, bundle);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      handleExportTextAudit();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      await safePrintOrDownloadRoadmap(roadmapSteps, profile, bundle);
+    } catch (err) {
+      await handleDownloadPDF();
+    }
   };
 
   const excludedSchemes = evaluations.filter(
@@ -241,31 +267,59 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
           )}
 
           <button
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPdf}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+            title="Download verified PDF summary report"
+          >
+            {isGeneratingPdf ? (
+              <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <FileText className="w-3.5 h-3.5 text-blue-200" />
+            )}
+            <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
+          </button>
+
+          <button
             onClick={handlePrint}
             className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
             title="Print or export as clean PDF"
           >
-            <Printer className="w-4 h-4 text-blue-800" />
-            Print / Save PDF
+            <Printer className="w-4 h-4 text-slate-700" />
+            Print
+          </button>
+
+          <button
+            onClick={() => setIsPaymentModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-amber-900 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            title="Fast-Track Assisted Filing Pass"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+            <span>{hasPaidPro ? 'Assisted Pass Active' : 'Assisted Filing Pass (₹49)'}</span>
           </button>
 
           <button
             onClick={handleExportTextAudit}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-900 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition-colors cursor-pointer"
             title="Download offline plain text audit trail"
           >
-            <Download className="w-4 h-4 text-blue-700" />
-            Download .TXT
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            .TXT
           </button>
 
           <button
             onClick={onRestart}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
           >
-            <RotateCcw className="w-4 h-4" />
-            New Assessment
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset
           </button>
         </div>
+      </div>
+
+      {/* Statutory Advisory & Eligibility Disclaimer Banner */}
+      <div className="mb-6">
+        <StatutoryDisclaimerModal />
       </div>
 
       {/* Citizen Assessment Summary Badge */}
@@ -464,6 +518,15 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Fast-Track Payment Modal */}
+      <PaymentCheckoutModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentSuccess={() => {
+          setHasPaidPro(true);
+        }}
+      />
     </div>
   );
 };

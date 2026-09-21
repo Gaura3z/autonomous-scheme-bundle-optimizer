@@ -1,6 +1,6 @@
 /**
  * Responsive Step Progress Indicator
- * Clean visual breadcrumb showing citizen where they are in the continuous assessment flow.
+ * Clean visual breadcrumb showing students where they are in the continuous 6-step assessment flow.
  * Kurukshetra 2.0 HACKFEST 2026 PS16
  */
 import React from 'react';
@@ -20,14 +20,12 @@ interface StepMeta {
 }
 
 const STEPS: StepMeta[] = [
-  { key: 'PROFILE', label: 'Profile', stageOrder: 1 },
-  { key: 'QUESTIONNAIRE', label: 'Matching & Questions', stageOrder: 2 },
-  { key: 'DOCUMENT_CHECKLIST', label: 'Documents', stageOrder: 3 },
-  { key: 'ELIGIBILITY_RESULTS', label: 'Eligibility', stageOrder: 4 },
-  { key: 'CONFLICT_DETECTION', label: 'Conflicts', stageOrder: 5 },
-  { key: 'OPTIMIZED_BUNDLE', label: 'Bundle', stageOrder: 6 },
-  { key: 'DOCUMENT_READINESS', label: 'Readiness', stageOrder: 7 },
-  { key: 'APPLICATION_ROADMAP', label: 'Roadmap', stageOrder: 8 },
+  { key: 'PROFILE', label: '1. Profile', stageOrder: 1 },
+  { key: 'QUESTIONNAIRE', label: '2. Verification', stageOrder: 2 },
+  { key: 'DOCUMENT_CHECKLIST', label: '3. Documents', stageOrder: 3 },
+  { key: 'PROCESSING', label: '4. AI Solver', stageOrder: 4 },
+  { key: 'OPTIMIZED_BUNDLE', label: '5. Benefit Bundle', stageOrder: 5 },
+  { key: 'APPLICATION_ROADMAP', label: '6. Roadmap', stageOrder: 6 },
 ];
 
 function getStageOrder(stage: AssessmentStage): number {
@@ -40,37 +38,32 @@ function getStageOrder(stage: AssessmentStage): number {
       return 1;
     case 'initial_matching':
     case 'CANDIDATE_MATCH':
-      return 2;
+      return 1.5;
     case 'questionnaire':
     case 'QUESTIONNAIRE':
-      return 2.5;
-    case 'processing':
-    case 'PROCESSING':
-      return 3.5;
-    case 'results':
-    case 'ELIGIBILITY_RESULTS':
-      return 4;
-    case 'conflicts':
-    case 'CONFLICT_DETECTION':
-      return 5;
-    case 'bundle':
-    case 'OPTIMIZED_BUNDLE':
-      return 6;
+      return 2;
     case 'documents_checklist':
     case 'DOCUMENT_CHECKLIST':
       return 3;
+    case 'processing':
+    case 'PROCESSING':
+      return 4;
+    case 'results':
+    case 'ELIGIBILITY_RESULTS':
+    case 'conflicts':
+    case 'CONFLICT_DETECTION':
+    case 'bundle':
+    case 'OPTIMIZED_BUNDLE':
+      return 5;
     case 'readiness':
     case 'DOCUMENT_READINESS':
-      return 7;
     case 'dependencies':
     case 'DOCUMENT_DEPENDENCIES':
-      return 7.5;
     case 'roadmap':
     case 'APPLICATION_ROADMAP':
-      return 8;
     case 'explanation':
     case 'RECOMMENDATION_SUMMARY':
-      return 9;
+      return 6;
     default:
       return 1;
   }
@@ -78,12 +71,15 @@ function getStageOrder(stage: AssessmentStage): number {
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStage, onNavigateStage }) => {
   const norm = String(currentStage).toLowerCase();
-  if (norm === 'landing' || norm === 'processing') {
+  if (norm === 'landing') {
     return null;
   }
 
   const currentOrder = getStageOrder(currentStage);
-  const progressPercent = Math.min(100, Math.max(0, ((currentOrder - 1) / (STEPS.length - 1)) * 100));
+  const roundedOrder = Math.min(6, Math.max(1, Math.round(currentOrder)));
+  const progressPercent = Math.min(100, Math.max(0, ((currentOrder - 1) / 5) * 100));
+
+  const currentStepMeta = STEPS.find(s => s.stageOrder === roundedOrder) || STEPS[0];
 
   return (
     <nav aria-label="Assessment Progress" className="w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 py-3 px-4 shadow-xs sticky top-16 z-30 transition-all">
@@ -91,8 +87,6 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStage, onNaviga
         {/* Desktop view */}
         <div className="hidden sm:flex items-center justify-between relative">
           {/* Background rail */}
-          {/* The rail is aligned to the center of the 28px step circles.
-              It must not use 50% of the whole item because labels sit below. */}
           <div className="absolute top-3.5 left-3 right-3 h-1 bg-slate-200/90 -translate-y-1/2 z-0 rounded-full" />
           
           {/* Animated active progress fill */}
@@ -154,18 +148,18 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStage, onNaviga
         <div className="sm:hidden flex items-center justify-between">
           <div className="flex items-center gap-2">
             <motion.span 
-              key={currentOrder}
+              key={roundedOrder}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold shadow-xs"
             >
-              {Math.min(8, Math.max(1, Math.round(currentOrder)))}
+              {roundedOrder}
             </motion.span>
             <span className="text-xs font-semibold text-slate-800">
-              Stage {Math.min(8, Math.max(1, Math.round(currentOrder)))} of 8:
+              Step {roundedOrder} of 6:
             </span>
-            <span className="text-xs font-medium text-blue-700">
-              {STEPS.find(s => s.stageOrder === Math.round(currentOrder))?.label || 'Assessment'}
+            <span className="text-xs font-bold text-blue-700 truncate max-w-[140px]">
+              {currentStepMeta.label.replace(/^\d+\.\s*/, '')}
             </span>
           </div>
 
@@ -173,7 +167,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStage, onNaviga
             <motion.div 
               className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full"
               initial={{ width: '0%' }}
-              animate={{ width: `${Math.min(100, (currentOrder / 8) * 100)}%` }}
+              animate={{ width: `${Math.min(100, (roundedOrder / 6) * 100)}%` }}
               transition={{ type: 'spring', stiffness: 100, damping: 18 }}
             />
           </div>

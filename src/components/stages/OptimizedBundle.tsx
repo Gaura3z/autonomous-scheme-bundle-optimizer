@@ -20,22 +20,71 @@ import {
   Printer,
   ExternalLink
 } from 'lucide-react';
-import { OptimizedBundle, Scheme } from '../../types';
+import { OptimizedBundle, Scheme, CitizenProfile } from '../../types';
 import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
 import { getBundleValidity } from '../../engine/validity';
+import { VoiceGuideBanner } from '../common/VoiceGuideBanner';
+import { MobileStickyFooter } from '../common/MobileStickyFooter';
+import { StatutoryDisclaimerModal } from '../common/StatutoryDisclaimerModal';
+import { PaymentCheckoutModal } from '../common/PaymentCheckoutModal';
+import { downloadBundlePdfFile } from '../../services/roadmapPdf';
 
 interface OptimizedBundleProps {
   bundle: OptimizedBundle;
+  profile?: CitizenProfile;
   onProceedToDocuments: () => void;
   onBackToConflicts: () => void;
 }
 
 export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
   bundle,
+  profile,
   onProceedToDocuments,
   onBackToConflicts
 }) => {
   const [showWhyModal, setShowWhyModal] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [hasPaidPro, setHasPaidPro] = useState(() => {
+    return localStorage.getItem('schemewise_pro_paid') === 'true';
+  });
+
+  const effectiveProfile: CitizenProfile = profile || {
+    state: 'MH',
+    socialCategory: 'General',
+    age: 20,
+    gender: 'Male',
+    annualFamilyIncome: 250000,
+    educationLevel: 'Undergraduate',
+    employmentStatus: 'Student',
+    isStudent: true,
+    isMinority: false,
+    hasDisability: false,
+    hasBPLCard: false,
+    areaType: 'Urban',
+    hasCasteValidity: false,
+    hasNonCreamyLayer: false,
+    isOrphan: false,
+    isFarmer: false,
+    isLandlessLabour: false,
+    isConstructionWorker: false,
+    isStreetVendor: false,
+    isHosteller: false,
+    isWomanEntrepreneur: false
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      await downloadBundlePdfFile(bundle, effectiveProfile);
+    } catch (err) {
+      console.error('PDF error:', err);
+      window.print();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   const validity = getBundleValidity(bundle.selectedSchemes.length > 0 ? bundle.selectedSchemes : (bundle.potentialSelectedSchemes ?? []));
 
   useEffect(() => {
@@ -53,13 +102,23 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 sm:py-10">
+    <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10 pb-24 sm:pb-10">
+      {/* Voice Guide Banner */}
+      <VoiceGuideBanner
+        stepNumber={5}
+        totalSteps={6}
+        title="Your Maximum-Benefit Scholarship Package"
+        guidanceText="Here is your optimal, non-conflicting scholarship package! The solver selected these schemes to maximize your financial grant and fee waiver while respecting Government of Maharashtra exclusion rules. Scroll down to review your benefits and tap 'View Application Roadmap'."
+        marathiText="हा तुमचा सर्वोत्तम बिन-तक्रार शिष्यवृत्ती संच आहे! सर्व योजना पाहण्यासाठी खाली स्क्रोल करा आणि अर्ज प्रक्रिया पाहण्यासाठी 'रोडमॅप पहा' वर टॅप करा."
+        showScrollHint={true}
+      />
+
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            Stage 6 • Optimized Bundle
+            Step 5 of 6 • Optimized Bundle
           </span>
           <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
             Status: {bundle.solverStatus}
@@ -313,10 +372,20 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
           onClick={onProceedToDocuments}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-900/20 transition-all hover:translate-x-0.5 cursor-pointer"
         >
-          Review document readiness
+          View Official Application Roadmap & Deadlines
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Mobile Sticky Action Footer */}
+      <MobileStickyFooter
+        currentStep={5}
+        totalSteps={6}
+        nextStepLabel="View Application Roadmap →"
+        onNext={onProceedToDocuments}
+        onBack={onBackToConflicts}
+        backLabel="Back"
+      />
     </div>
   );
 };

@@ -31,6 +31,7 @@ import {
   EmploymentStatus,
   SelfEmploymentCategory
 } from '../../types';
+import { VoiceGuideBanner } from '../common/VoiceGuideBanner';
 
 interface ProfileFormProps {
   profile: CitizenProfile;
@@ -179,15 +180,15 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
   return (
     <div className="min-h-[82vh] flex flex-col justify-between max-w-2xl mx-auto px-4 py-6 sm:py-10">
-      {/* Focused intake notice */}
-      <div className="mb-6 flex items-center justify-between bg-emerald-50/70 border border-emerald-200/80 rounded-2xl px-4 py-2.5 text-xs text-emerald-950">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-          <span className="font-medium">
-            <strong>Progressive Intake Mode:</strong> Chunked 1-by-1 citizen assessment
-          </span>
-        </div>
-      </div>
+      {/* Civic Voice & Step Guide Banner */}
+      <VoiceGuideBanner
+        stepNumber={1}
+        totalSteps={6}
+        title="Student & Citizen Profile Intake"
+        guidanceText="Enter your age, college education, caste category, and annual family income. When you tap Next, our engine will scan 110 Central and Maharashtra Government schemes and automatically redirect you to quick verification questions."
+        marathiText="तुमचे वय, उच्च शिक्षण, जात प्रवर्ग आणि वार्षिक कौटुंबिक उत्पन्न भरा. पुढे गेल्यावर सिस्टीम सर्व ११० योजनांची पडताळणी करेल."
+        showScrollHint={true}
+      />
 
       {/* Main Container Card */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-10 relative">

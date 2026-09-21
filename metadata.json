@@ -1,5 +1,5 @@
 {
-  "name": "Autonomous Scheme-Bundle Optimizer for Citizens",
+  "name": "SchemeWise — Autonomous Scheme-Bundle Optimizer",
   "description": "An autonomous citizen-benefits decision support and scheme-bundle optimizer with deterministic eligibility, conflict resolution, document inventory, and actionable application roadmaps.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

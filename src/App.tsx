@@ -377,6 +377,8 @@ export default function App() {
             {normalizedStage === 'APPLICATION_ROADMAP' && (
               <ApplicationRoadmap
                 steps={roadmapSteps}
+                profile={profile}
+                bundle={authoritativeBundle}
                 onProceedToSummary={() => setStage('RECOMMENDATION_SUMMARY')}
                 onBackToDependencies={() => setStage('DOCUMENT_DEPENDENCIES')}
               />
