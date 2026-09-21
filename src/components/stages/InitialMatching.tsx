@@ -39,26 +39,43 @@ export const InitialMatching: React.FC<InitialMatchingProps> = ({
   onBackToProfile
 }) => {
   const [countdownProgress, setCountdownProgress] = useState(0);
+  const hasTriggeredRef = React.useRef(false);
+  const onContinueRef = React.useRef(onContinue);
+
+  useEffect(() => {
+    onContinueRef.current = onContinue;
+  }, [onContinue]);
 
   // Auto-redirect to questionnaire after 2.0 seconds with smooth visual progress
   useEffect(() => {
+    hasTriggeredRef.current = false;
     const intervalTime = 30;
     const totalTime = 2000;
-    const increment = (intervalTime / totalTime) * 100;
+    const startTime = Date.now();
 
     const timer = setInterval(() => {
-      setCountdownProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          onContinue();
-          return 100;
-        }
-        return prev + increment;
-      });
+      if (hasTriggeredRef.current) return;
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(100, (elapsed / totalTime) * 100);
+      setCountdownProgress(progress);
+
+      if (progress >= 100) {
+        hasTriggeredRef.current = true;
+        clearInterval(timer);
+        onContinueRef.current();
+      }
     }, intervalTime);
 
-    return () => clearInterval(timer);
-  }, [onContinue]);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  const handleManualContinue = () => {
+    if (hasTriggeredRef.current) return;
+    hasTriggeredRef.current = true;
+    onContinueRef.current();
+  };
 
   const maharashtraSpecificCount = candidates.filter(
     (c) => (c.targetStates && c.targetStates.includes('MH')) || c.jurisdiction === 'State-Specific'
@@ -144,7 +161,7 @@ export const InitialMatching: React.FC<InitialMatchingProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
           <motion.button
             type="button"
-            onClick={onContinue}
+            onClick={handleManualContinue}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm shadow-md shadow-blue-900/20 cursor-pointer transition-all"

@@ -56,7 +56,11 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [hasPaidPro, setHasPaidPro] = useState(() => {
-    return localStorage.getItem('schemewise_pro_paid') === 'true';
+    try {
+      return localStorage.getItem('schemewise_pro_paid') === 'true';
+    } catch {
+      return false;
+    }
   });
 
   const handleDownloadPDF = async () => {
@@ -111,12 +115,12 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
 
     content += `CITIZEN PROFILE:\n`;
     content += `Age: ${profile.age} | Gender: ${profile.gender} | State: ${profile.state}\n`;
-    content += `Social Category: ${categoryLabel} | Occupation: ${profile.occupationCategory || 'General'}\n`;
+    content += `Social Category: ${categoryLabel} | Occupation: ${profile.occupation || profile.employmentStatus || 'General'}\n`;
     content += `Annual Family Income: INR ${profile.annualFamilyIncome.toLocaleString('en-IN')}\n\n`;
 
     content += `===============================================================================\n`;
     content += `1. SELECTED SCHEMES IN OPTIMIZED BUNDLE (${bundle.selectedSchemes.length} Schemes):\n`;
-    content += `   Total Direct Monetary Benefit: ${bundle.totalMonetaryBenefit}\n`;
+    content += `   Total Direct Monetary Benefit: INR ${bundle.totalMonetaryAnnual.toLocaleString('en-IN')}\n`;
     content += `   Conflicts resolved / alternatives rejected: ${bundle.conflictsResolvedCount}\n`;
     content += `===============================================================================\n\n`;
 
@@ -329,7 +333,7 @@ export const RecommendationSummary: React.FC<RecommendationSummaryProps> = ({
           <span>Age: {profile.age}</span> • <span>Gender: {profile.gender}</span> • <span>State: {profile.state}</span> • <span>Category: {categoryLabel}</span> • <span>Income: ₹{(profile.annualFamilyIncome).toLocaleString('en-IN')}/yr</span>
         </div>
         <span className="font-mono text-[11px] text-slate-500 print:text-slate-800">
-          Generated via PS16 Autonomous Optimizer • {bundle.selectedSchemes.length} Schemes • Value: {bundle.totalMonetaryBenefit}
+          Generated via PS16 Autonomous Optimizer • {bundle.selectedSchemes.length} Schemes • Value: ₹{bundle.totalMonetaryAnnual.toLocaleString('en-IN')}
         </span>
       </div>
 

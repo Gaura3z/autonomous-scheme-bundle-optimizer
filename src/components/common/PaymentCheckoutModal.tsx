@@ -46,8 +46,12 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
       setTxnDetails(generatedTxn);
       setIsProcessing(false);
       setPaymentSuccess(true);
-      localStorage.setItem('schemewise_pro_paid', 'true');
-      localStorage.setItem('schemewise_pro_plan', selectedPlan);
+      try {
+        localStorage.setItem('schemewise_pro_paid', 'true');
+        localStorage.setItem('schemewise_pro_plan', selectedPlan);
+      } catch {
+        // ignore in sandboxed iframes
+      }
       confetti({
         particleCount: 80,
         spread: 70,
@@ -57,6 +61,40 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
         onPaymentSuccess(selectedPlan, generatedTxn.id);
       }
     }, 1500);
+  };
+
+  const handleDownloadReceipt = () => {
+    if (!txnDetails) return;
+    const content = `====================================================================\n` +
+      `TAX INVOICE & PAYMENT RECEIPT\n` +
+      `SchemeWise — Autonomous Scheme-Bundle Optimizer (PS16)\n` +
+      `National e-Governance Assistance Service\n` +
+      `====================================================================\n\n` +
+      `Transaction ID    : ${txnDetails.id}\n` +
+      `Date & Time       : ${txnDetails.date}\n` +
+      `Service Purchased : Fast-Track Assisted Filing Pass (${selectedPlan.toUpperCase()})\n` +
+      `Amount Paid       : INR ${txnDetails.amount}.00 (Inclusive of GST)\n` +
+      `Payment Mode      : UPI / NetBanking / Direct Nodal Settlement\n` +
+      `Payment Status    : SUCCESS / CONFIRMED\n\n` +
+      `BENEFITS UNLOCKED:\n` +
+      `- Dedicated Application Desk Assistance & Document Pre-scrutiny\n` +
+      `- Automated SMS & WhatsApp Calendar Filing Alerts\n` +
+      `- Tahsildar / MahaDBT Nodal Officer Follow-up Verification Tracking\n` +
+      `- Priority Appeal Assistance for Unjust Objections\n\n` +
+      `====================================================================\n` +
+      `Thank you for trusting SchemeWise. This is an electronically generated receipt.\n` +
+      `Support: helpdesk@schemewise.gov.in\n` +
+      `====================================================================\n`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SchemeWise_Receipt_${txnDetails.id}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
   };
 
   return (
@@ -126,12 +164,23 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-sm transition-all"
-            >
-              Continue to Application Roadmap
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleDownloadReceipt}
+                className="flex-1 py-2.5 px-3 border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Invoice</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                Continue to Roadmap
+              </button>
+            </div>
           </div>
         ) : (
           /* Payment Form */

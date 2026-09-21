@@ -52,7 +52,11 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [hasPaidPro, setHasPaidPro] = useState(() => {
-    return localStorage.getItem('schemewise_pro_paid') === 'true';
+    try {
+      return localStorage.getItem('schemewise_pro_paid') === 'true';
+    } catch {
+      return false;
+    }
   });
 
   const toggleStep = (stepId: string) => {
@@ -154,23 +158,27 @@ export const ApplicationRoadmap: React.FC<ApplicationRoadmapProps> = ({
     socialCategory: 'General',
     age: 20,
     gender: 'Male',
+    maritalStatus: 'Single',
     annualFamilyIncome: 250000,
     educationLevel: 'Undergraduate',
     employmentStatus: 'Student',
+    occupation: 'Student',
     isStudent: true,
-    isMinority: false,
-    hasDisability: false,
     hasBPLCard: false,
+    hasRationCard: false,
     areaType: 'Urban',
+    hasDisability: false,
+    isMinority: false,
+    isFarmer: false,
     hasCasteValidity: false,
     hasNonCreamyLayer: false,
-    isOrphan: false,
-    isFarmer: false,
-    isLandlessLabour: false,
-    isConstructionWorker: false,
-    isStreetVendor: false,
+    isOrphanOrSingleParent: false,
     isHosteller: false,
-    isWomanEntrepreneur: false
+    isWomanEntrepreneur: false,
+    hasStreetVendingActivity: false,
+    enrolledInHigherEducation: true,
+    pursuingApprenticeship: false,
+    hasGirlChildUnder10: false
   };
 
   // Direct, rock-solid PDF generation and file download using pdf-lib

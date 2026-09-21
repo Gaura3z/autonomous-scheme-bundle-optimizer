@@ -82,7 +82,13 @@ const readRegistry = (): RegistryRecord[] => {
 
 export function AdminPortal({ onExit }: { onExit: () => void }) {
   const [records, setRecords] = useState<RegistryRecord[]>(readRegistry);
-  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('ps16-admin-token') || '');
+  const [adminToken, setAdminToken] = useState(() => {
+    try {
+      return localStorage.getItem('ps16-admin-token') || '';
+    } catch {
+      return '';
+    }
+  });
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -97,7 +103,14 @@ export function AdminPortal({ onExit }: { onExit: () => void }) {
   const [message, setMessage] = useState('');
   const reviewCount = useMemo(() => records.filter((record) => record.status === 'REVIEW_REQUIRED').length, [records]);
 
-  const save = (next: RegistryRecord[]) => { setRecords(next); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); };
+  const save = (next: RegistryRecord[]) => { 
+    setRecords(next); 
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); 
+    } catch {
+      // ignore
+    }
+  };
   const update = (key: keyof RegistryRecord, value: string) => setForm((current) => ({ ...current, [key]: value }));
   const addDocument = () => {
     if (selectedDocumentId && !form.requiredDocumentIds.includes(selectedDocumentId)) setForm((current) => ({ ...current, requiredDocumentIds: [...current.requiredDocumentIds, selectedDocumentId] }));

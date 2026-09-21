@@ -100,39 +100,45 @@ export async function createDocumentReadinessPdf(readiness: DocumentReadiness): 
   write(`Generated: ${new Date().toLocaleDateString('en-IN')}`, { size: 9, color: rgb(0.35, 0.40, 0.48), gap: 10 });
   divider();
 
+  const readySchemes = readiness.readySchemes ?? [];
+  const documentMissingSchemes = readiness.documentMissingSchemes ?? (readiness as any).blockedSchemes ?? [];
+
   write(
-    `Summary: ${readiness.readySchemes.length} scheme(s) ready to pursue and ${readiness.documentMissingSchemes.length} scheme(s) eligible but waiting for documents. Missing documents are readiness gaps, not eligibility rejections.`,
+    `Summary: ${readySchemes.length} scheme(s) ready to pursue and ${documentMissingSchemes.length} scheme(s) eligible but waiting for documents. Missing documents are readiness gaps, not eligibility rejections.`,
     { size: 10, font: bold, color: rgb(0.08, 0.25, 0.18), gap: 12 }
   );
 
-  write(`READY TO PURSUE (${readiness.readySchemes.length} scheme(s))`, {
+  write(`READY TO PURSUE (${readySchemes.length} scheme(s))`, {
     size: 13,
     font: bold,
     color: rgb(0.04, 0.38, 0.22),
     gap: 6
   });
-  if (readiness.readySchemes.length === 0) {
+  if (readySchemes.length === 0) {
     write('No schemes currently have all required documents available.', { size: 10, color: rgb(0.35, 0.40, 0.48), gap: 8 });
   } else {
-    for (const scheme of readiness.readySchemes) {
-      write(`${scheme.name} - ${scheme.benefit.displayAmount}`, { size: 11, font: bold, indent: 8, gap: 2 });
+    for (const scheme of readySchemes) {
+      write(`${scheme.name} - ${scheme.benefit?.displayAmount || 'Government Grant'}`, { size: 11, font: bold, indent: 8, gap: 2 });
       write(`Category: ${scheme.category}. Official portal: ${scheme.officialSourceUrl}`, { size: 9, indent: 20, color: rgb(0.28, 0.33, 0.40), gap: 8 });
     }
   }
 
   divider();
-  write(`ELIGIBLE, BUT DOCUMENT MISSING (${readiness.documentMissingSchemes.length} scheme(s))`, {
+  write(`ELIGIBLE, BUT DOCUMENT MISSING (${documentMissingSchemes.length} scheme(s))`, {
     size: 13,
     font: bold,
     color: rgb(0.55, 0.32, 0.03),
     gap: 6
   });
-  if (readiness.documentMissingSchemes.length === 0) {
+  if (documentMissingSchemes.length === 0) {
     write('All required documents are available for the current bundle.', { size: 10, color: rgb(0.12, 0.38, 0.24), gap: 8 });
   } else {
-    for (const { scheme, missingDocuments } of readiness.documentMissingSchemes) {
-      write(`${scheme.name} - ${scheme.benefit.displayAmount}`, { size: 11, font: bold, indent: 8, gap: 2 });
-      write(`Missing documents: ${missingDocuments.map((document) => document.name).join(', ')}`, {
+    for (const item of documentMissingSchemes) {
+      const scheme = item.scheme;
+      const missingDocs = item.missingDocuments ?? [];
+      const docNames = missingDocs.map((document: any) => document?.name || String(document)).join(', ') || 'Pending certificates';
+      write(`${scheme.name} - ${scheme.benefit?.displayAmount || 'Government Grant'}`, { size: 11, font: bold, indent: 8, gap: 2 });
+      write(`Missing documents: ${docNames}`, {
         size: 9,
         indent: 20,
         color: rgb(0.48, 0.29, 0.03),

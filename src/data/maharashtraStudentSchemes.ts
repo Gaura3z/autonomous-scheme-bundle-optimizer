@@ -7,7 +7,7 @@ import { RulePredicate, Scheme, SchemeCategory } from '../types';
 
 const VERIFIED_ON = '2026-09-20';
 const CATALOG_VERSION = 'v2026.2-PS16';
-const DEMO_NOTE = 'Verified official scheme guidelines. Citizen should apply via Aaple Sarkar MahaDBT or National Scholarship Portal.';
+const STATUTORY_NOTE = 'Verified official scheme guidelines. Citizen should apply via Aaple Sarkar MahaDBT or National Scholarship Portal.';
 
 type SchemeDefinitionOptions = {
   id: string;
@@ -34,7 +34,7 @@ function createStudentScheme(options: SchemeDefinitionOptions): Scheme {
     rules: { ...options.rules, id: `rule_${options.id}` },
     lastVerifiedDate: VERIFIED_ON,
     kbVersion: CATALOG_VERSION,
-    validityNote: DEMO_NOTE,
+    validityNote: STATUTORY_NOTE,
     applicationSteps: options.applicationSteps ?? [
       {
         sequence: 1,

@@ -15,15 +15,29 @@ export function evaluatePredicate(predicate: RulePredicate, profile: CitizenProf
   }
 
   switch (op) {
-    case 'eq':
+    case 'eq': {
+      let isMatch = profileVal === value;
+      if (!isMatch && field === 'state') {
+        const mh = ['Maharashtra', 'MH', 'maharashtra', 'mh'];
+        if (mh.includes(String(profileVal)) && mh.includes(String(value))) {
+          isMatch = true;
+        }
+      }
       return {
-        met: profileVal === value,
-        reason: profileVal === value ? `Condition satisfied: ${label}` : `Unmet: ${label} (Your profile: ${String(profileVal)})`
+        met: isMatch,
+        reason: isMatch ? `Condition satisfied: ${label}` : `Unmet: ${label} (Your profile: ${String(profileVal)})`
       };
+    }
 
     case 'in':
       if (Array.isArray(value)) {
-        const matches = value.includes(profileVal);
+        let matches = value.includes(profileVal);
+        if (!matches && field === 'state') {
+          const mh = ['Maharashtra', 'MH', 'maharashtra', 'mh'];
+          if (mh.includes(String(profileVal)) && value.some((v: any) => mh.includes(String(v)))) {
+            matches = true;
+          }
+        }
         return {
           met: matches,
           reason: matches ? `Condition satisfied: ${label}` : `Unmet: ${label} (Requires one of: ${value.join(', ')})`
@@ -80,7 +94,14 @@ export function evaluateScheme(scheme: Scheme, profile: CitizenProfile): SchemeE
 
   // Check Jurisdiction first
   if (scheme.jurisdiction === 'State-Specific' && scheme.targetStates && scheme.targetStates.length > 0) {
-    if (!scheme.targetStates.includes(profile.state)) {
+    const mhAliases = ['Maharashtra', 'MH', 'maharashtra', 'mh'];
+    const isStateMatch = scheme.targetStates.some(targetState => {
+      if (targetState === profile.state) return true;
+      if (mhAliases.includes(targetState) && mhAliases.includes(profile.state)) return true;
+      return false;
+    });
+
+    if (!isStateMatch) {
       unmetReasons.push(`Scheme is notified specifically for residents of ${scheme.targetStates.join(', ')} (Your state: ${profile.state})`);
     } else {
       matchedPositiveReasons.push(`State domicile criteria met for ${profile.state}`);
@@ -88,16 +109,35 @@ export function evaluateScheme(scheme: Scheme, profile: CitizenProfile): SchemeE
   }
 
   // Academic and Demographic coherence guardrails
-  const isHighSchoolOrDiploma = ['Below 10th', '10th Pass', '12th Pass', 'Diploma'].includes(profile.educationLevel) || profile.age < 20;
+  const isSchoolOrCollegeJunior = ['Below 10th', '10th Pass', '12th Pass', 'Diploma'].includes(profile.educationLevel) || profile.age < 20;
+  const isPostgradOrDoctoralEligible = Boolean(
+    profile.educationLevel === 'Postgraduate' || 
+    profile.academicFocus === 'Doctoral' || 
+    profile.isEnrolledInPhd === true
+  );
+
+  const isAspirantCandidate = Boolean(
+    profile.isAspirant === true ||
+    profile.academicFocus === 'Aspirant' ||
+    profile.educationLevel === 'Postgraduate' ||
+    profile.employmentRole?.toLowerCase().includes('aspirant') ||
+    profile.occupation?.toLowerCase().includes('aspirant') ||
+    profile.isPreparingForUpscOrMpsc === true
+  );
+
   const requiresPhd = (scheme.rules.all ?? []).some(r => r.field === 'isEnrolledInPhd') ||
                       (scheme.rules.any ?? []).some(r => r.field === 'isEnrolledInPhd');
-  if (requiresPhd && (isHighSchoolOrDiploma || profile.isEnrolledInPhd === false)) {
-    unmetReasons.push(`Requires active Ph.D./doctoral research registration (Not applicable for ${profile.educationLevel})`);
+  if (requiresPhd) {
+    if (!isPostgradOrDoctoralEligible || profile.isEnrolledInPhd === false) {
+      unmetReasons.push(`Requires active Ph.D./doctoral research registration (Candidate has not indicated Postgraduate or Doctoral status)`);
+    }
   }
 
   const requiresCivilServices = (scheme.rules.all ?? []).some(r => r.field === 'isPreparingForUpscOrMpsc' || r.field === 'hasClearedUpscOrMpscStage');
-  if (requiresCivilServices && (isHighSchoolOrDiploma || profile.isPreparingForUpscOrMpsc === false || profile.hasClearedUpscOrMpscStage === false)) {
-    unmetReasons.push('Requires graduate-level UPSC/MPSC competitive civil services examination pathway');
+  if (requiresCivilServices) {
+    if (!isAspirantCandidate || isSchoolOrCollegeJunior || profile.age < 21 || profile.isPreparingForUpscOrMpsc === false || profile.hasClearedUpscOrMpscStage === false) {
+      unmetReasons.push('Requires graduate-level UPSC/MPSC competitive civil services examination pathway (Age 21+ and Aspirant / Postgraduate status)');
+    }
   }
 
   if (scheme.rules.all?.some(r => r.field === 'isFarmer') && !profile.isFarmer) {

@@ -70,6 +70,7 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     id: 'q_professional_course',
     field: 'isProfessionalCourse',
     title: 'Are you enrolled in a professional or technical course (Engineering, Medical, Pharmacy, MBA, Polytechnic, Architecture)?',
+    titleMr: 'तुम्ही व्यावसायिक किंवा तांत्रिक अभ्यासक्रमात (अभियांत्रिकी, वैद्यकीय, फार्मसी, एमबीए, पॉलीटेक्निक) प्रवेश घेतला आहे का?',
     contextExplanation: 'Technical and professional degrees have distinct fee reimbursement rules and higher scholarship tiers under Maharashtra DTE/DHE and AICTE.',
     schemeJustification: 'Unlocks: Rajarshi Chhatrapati Shahu Maharaj EBC 50% Fee Concession, AICTE Pragati, and Professional Freeship.',
     type: 'boolean'
@@ -78,6 +79,7 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     id: 'q_hosteller_status',
     field: 'isHosteller',
     title: 'Do you reside in a college hostel or rented room/PG away from your home district?',
+    titleMr: 'तुम्ही महाविद्यालयाच्या वसतिगृहात किंवा स्वतःच्या तालुक्याबाहेर भाड्याच्या खोलीत/PG मध्ये राहता का?',
     contextExplanation: 'Hostel residents and students living in rented rooms away from home qualify for substantial monthly food, accommodation, and book allowances.',
     schemeJustification: 'Unlocks: Dr. Panjabrao Deshmukh Vastigruh Nirvah Bhatta (₹30,000/yr) and Dr. Ambedkar Swadhar Yojana (₹51,000/yr).',
     type: 'boolean'
@@ -86,6 +88,7 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     id: 'q_cap_admission',
     field: 'isCapAdmitted',
     title: 'Were you admitted to your course through the Centralized Admission Process (CAP Round) via CET / NEET / JEE?',
+    titleMr: 'तुमचा प्रवेश केंद्रीय प्रवेश प्रक्रियेद्वारे (CAP Round - CET / NEET / JEE) झाला आहे का?',
     contextExplanation: 'Government tuition fee waivers and scholarship schemes in Maharashtra mandate merit admission through State CET Cell CAP rounds.',
     schemeJustification: 'Mandatory for: MahaDBT Fee Reimbursement, EBC Scholarship, and Caste Tuition Freeships.',
     type: 'boolean'
@@ -94,6 +97,7 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     id: 'q_qualifying_marks_60',
     field: 'hasQualifyingExamAbove60',
     title: 'Did you secure 60% or higher aggregate marks (or top 20th percentile) in your previous qualifying exam?',
+    titleMr: 'मागील अर्हता परीक्षेत (१० वी / १२ वी किंवा पदवी) तुम्हाला ६०% किंवा अधिक गुण मिळाले आहेत का?',
     contextExplanation: 'Merit-based scholarships require verifiable academic performance in previous Class 10/12 or semester exams.',
     schemeJustification: 'Unlocks: Central Sector Scheme of Scholarship (CSSS), INSPIRE SHE Scholarship, and CM Fellowship.',
     type: 'boolean'
@@ -102,6 +106,7 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     id: 'q_caste_validity',
     field: 'hasCasteValidity',
     title: 'Do you possess a Caste Validity Certificate issued by the Divisional Caste Scrutiny Committee?',
+    titleMr: 'तुमच्याकडे विभागीय जात पडताळणी समितीने दिलेले जात वैधता प्रमाणपत्र (Caste Validity) उपलब्ध आहे का?',
     contextExplanation: 'For professional degree admissions in Maharashtra, social category fee benefits require scrutiny validation by the competent Caste Scrutiny Committee.',
     schemeJustification: 'Mandatory for: MahaDBT Post-Matric SC/ST/OBC/VJNT/SBC Fee Reimbursement.',
     type: 'boolean'
@@ -110,6 +115,7 @@ export const ADAPTIVE_QUESTIONS: AdaptiveQuestion[] = [
     id: 'q_non_creamy_layer',
     field: 'hasNonCreamyLayer',
     title: 'Do you hold a valid Non-Creamy Layer (NCL) Certificate (for OBC, VJNT, or SBC categories)?',
+    titleMr: 'तुमच्याकडे चालू आर्थिक वर्षाचे नॉन-क्रिमीलेअर (NCL) प्रमाणपत्र उपलब्ध आहे का?',
     contextExplanation: 'OBC, VJNT, and SBC candidates must possess a valid Tahsildar-issued Non-Creamy Layer certificate to claim affirmative fee concessions.',
     schemeJustification: 'Unlocks: OBC/VJNT/SBC Tuition & Exam Fee Waivers on MahaDBT.',
     type: 'boolean'

@@ -23,6 +23,7 @@ import { ProgressBar } from './components/layout/ProgressBar';
 import { HowItWorksModal } from './components/layout/HowItWorksModal';
 import { DemoProfileModal } from './components/layout/DemoProfileModal';
 import { ArchitectureModal } from './components/layout/ArchitectureModal';
+import { SystematicTestPlanModal } from './components/common/SystematicTestPlanModal';
 
 // Stage Components
 import { LandingPage } from './components/stages/LandingPage';
@@ -82,12 +83,18 @@ export default function App() {
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
   const [isDemoSelectorOpen, setIsDemoSelectorOpen] = useState(false);
   const [isArchitectureOpen, setIsArchitectureOpen] = useState(false);
+  const [isTestPlanOpen, setIsTestPlanOpen] = useState(false);
 
-  // Global listener to trigger architecture modal from anywhere
+  // Global listener to trigger architecture and test plan modals from anywhere
   useEffect(() => {
-    const handler = () => setIsArchitectureOpen(true);
-    window.addEventListener('open-architecture-modal', handler);
-    return () => window.removeEventListener('open-architecture-modal', handler);
+    const archHandler = () => setIsArchitectureOpen(true);
+    const testPlanHandler = () => setIsTestPlanOpen(true);
+    window.addEventListener('open-architecture-modal', archHandler);
+    window.addEventListener('open-test-plan-modal', testPlanHandler);
+    return () => {
+      window.removeEventListener('open-architecture-modal', archHandler);
+      window.removeEventListener('open-test-plan-modal', testPlanHandler);
+    };
   }, []);
 
   // Smooth scroll to top whenever the stage changes
@@ -97,16 +104,20 @@ export default function App() {
 
   useEffect(() => {
     if (stage !== 'LANDING') {
-      const draft: SavedAssessmentDraft = { profile, declaredDocumentIds, stage, savedAt: new Date().toISOString() };
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-      setResumeStage(stage);
-      setHasSavedDraft(true);
+      try {
+        const draft: SavedAssessmentDraft = { profile, declaredDocumentIds, stage, savedAt: new Date().toISOString() };
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+        setResumeStage(stage);
+        setHasSavedDraft(true);
+      } catch {
+        // Storage may be restricted in sandboxed iframes
+      }
     }
   }, [profile, declaredDocumentIds, stage]);
 
   const normalizedStage = String(stage).toUpperCase();
 
-  const isAdminPortal = window.location.pathname === '/admin' || new URLSearchParams(window.location.search).get('admin') === '1';
+  const isAdminPortal = typeof window !== 'undefined' && (window.location.pathname === '/admin' || new URLSearchParams(window.location.search).get('admin') === '1');
   if (isAdminPortal) {
     return <AdminPortal onExit={() => { window.location.href = '/'; }} />;
   }
@@ -130,7 +141,11 @@ export default function App() {
     setProfile(DEFAULT_PROFILE);
     setDeclaredDocumentIds(['aadhaar', 'ration_card', 'bank_passbook']);
     setStage('LANDING');
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch {
+      // Storage may be restricted in sandboxed iframes
+    }
     setHasSavedDraft(false);
   };
 
@@ -245,6 +260,7 @@ export default function App() {
         onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
         onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
         onOpenArchitecture={() => setIsArchitectureOpen(true)}
+        onOpenTestPlan={() => setIsTestPlanOpen(true)}
         onReset={handleReset}
         onGoHome={() => setStage('LANDING')}
       />
@@ -353,6 +369,7 @@ export default function App() {
             {normalizedStage === 'OPTIMIZED_BUNDLE' && (
               <OptimizedBundleView
                 bundle={authoritativeBundle}
+                profile={profile}
                 onProceedToDocuments={() => setStage('DOCUMENT_READINESS')}
                 onBackToConflicts={() => setStage('CONFLICT_DETECTION')}
               />
@@ -415,6 +432,11 @@ export default function App() {
         isOpen={isDemoSelectorOpen}
         onClose={() => setIsDemoSelectorOpen(false)}
         onSelectProfile={handleSelectDemoProfile}
+      />
+
+      <SystematicTestPlanModal
+        isOpen={isTestPlanOpen}
+        onClose={() => setIsTestPlanOpen(false)}
       />
 
       {/* Civic GIGW Footer */}

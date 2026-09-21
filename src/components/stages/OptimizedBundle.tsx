@@ -18,7 +18,8 @@ import {
   TrendingUp,
   Plus,
   Printer,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 import { OptimizedBundle, Scheme, CitizenProfile } from '../../types';
 import { SchemeJurisdictionBadge } from '../common/SchemeJurisdictionBadge';
@@ -46,7 +47,11 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [hasPaidPro, setHasPaidPro] = useState(() => {
-    return localStorage.getItem('schemewise_pro_paid') === 'true';
+    try {
+      return localStorage.getItem('schemewise_pro_paid') === 'true';
+    } catch {
+      return false;
+    }
   });
 
   const effectiveProfile: CitizenProfile = profile || {
@@ -54,23 +59,27 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
     socialCategory: 'General',
     age: 20,
     gender: 'Male',
+    maritalStatus: 'Single',
     annualFamilyIncome: 250000,
     educationLevel: 'Undergraduate',
     employmentStatus: 'Student',
+    occupation: 'Student',
     isStudent: true,
-    isMinority: false,
-    hasDisability: false,
     hasBPLCard: false,
+    hasRationCard: false,
     areaType: 'Urban',
+    hasDisability: false,
+    isMinority: false,
+    isFarmer: false,
     hasCasteValidity: false,
     hasNonCreamyLayer: false,
-    isOrphan: false,
-    isFarmer: false,
-    isLandlessLabour: false,
-    isConstructionWorker: false,
-    isStreetVendor: false,
+    isOrphanOrSingleParent: false,
     isHosteller: false,
-    isWomanEntrepreneur: false
+    isWomanEntrepreneur: false,
+    hasStreetVendingActivity: false,
+    enrolledInHigherEducation: true,
+    pursuingApprenticeship: false,
+    hasGirlChildUnder10: false
   };
 
   const handleDownloadPDF = async () => {
@@ -79,9 +88,21 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
       await downloadBundlePdfFile(bundle, effectiveProfile);
     } catch (err) {
       console.error('PDF error:', err);
-      window.print();
+      try {
+        window.print();
+      } catch {
+        // ignore
+      }
     } finally {
       setIsGeneratingPdf(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      window.print();
+    } catch {
+      await handleDownloadPDF();
     }
   };
 
@@ -131,14 +152,48 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
         <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
           This is your document-ready bundle: schemes that are eligible, legally compatible, and actionable with the documents you declared.
         </p>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs hover:border-blue-400 hover:text-blue-800 print:hidden"
-        >
-          <Printer className="h-4 w-4" />
-          Print / Save PDF
-        </button>
+        <div className="mt-4 flex flex-wrap items-center gap-2.5 print:hidden">
+          <button
+            type="button"
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPdf}
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-900 hover:bg-blue-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+            title="Download verified Scheme Bundle report as PDF"
+          >
+            {isGeneratingPdf ? (
+              <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <FileText className="h-4 w-4 text-blue-200" />
+            )}
+            <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Bundle PDF'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:border-blue-400 hover:text-blue-800 cursor-pointer transition-colors"
+          >
+            <Printer className="h-4 w-4 text-slate-600" />
+            <span>Print</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsPaymentModalOpen(true)}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold shadow-xs transition-all cursor-pointer ${
+              hasPaidPro 
+                ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' 
+                : 'bg-linear-to-r from-amber-500 to-amber-600 text-white hover:brightness-105 border border-amber-600'
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-amber-200" />
+            <span>{hasPaidPro ? 'Assisted Filing Pass Active' : 'Fast-Track Assisted Filing (₹49)'}</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-6 print:hidden">
+        <StatutoryDisclaimerModal />
       </div>
 
       <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
@@ -385,6 +440,14 @@ export const OptimizedBundleView: React.FC<OptimizedBundleProps> = ({
         onNext={onProceedToDocuments}
         onBack={onBackToConflicts}
         backLabel="Back"
+      />
+
+      <PaymentCheckoutModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentSuccess={(_plan, _txnId) => {
+          setHasPaidPro(true);
+        }}
       />
     </div>
   );

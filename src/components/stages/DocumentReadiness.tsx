@@ -37,35 +37,35 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
   const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const handlePdfExport = async () => {
-    // Reserve a tab while the click still has user activation. This avoids
-    // popup blocking when the generated PDF is opened after the async export.
-    const pdfWindow = window.open('', '_blank');
     setIsExportingPdf(true);
-
     try {
       const pdfBytes = await createDocumentReadinessPdf(readiness);
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
-
-      if (pdfWindow && !pdfWindow.closed) {
-        pdfWindow.location.href = pdfUrl;
-      } else {
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pdfUrl;
-        downloadLink.download = 'document-readiness-assessment-ps16.pdf';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        downloadLink.remove();
-      }
-
-      window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 60_000);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pdfUrl;
+      downloadLink.download = `SchemeWise_Document_Readiness_${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 10_000);
     } catch (error) {
-      pdfWindow?.close();
       console.error('Unable to create the document readiness PDF', error);
-      // Keep a native print fallback available if a browser blocks PDF export.
-      window.print();
+      try {
+        window.print();
+      } catch {
+        // ignore
+      }
     } finally {
       setIsExportingPdf(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      window.print();
+    } catch {
+      await handlePdfExport();
     }
   };
 
@@ -108,17 +108,31 @@ export const DocumentReadinessView: React.FC<DocumentReadinessProps> = ({
             </p>
           </div>
 
-          <div className="print:hidden shrink-0">
+          <div className="print:hidden shrink-0 flex items-center gap-2">
             <button
               type="button"
               onClick={handlePdfExport}
               disabled={isExportingPdf}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
-              title="Open or download the document readiness PDF"
-              aria-label="Open or download the document readiness assessment as a PDF"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+              title="Download verified Document Readiness PDF report"
+              aria-label="Download the document readiness assessment as a PDF"
             >
-              <Printer className="w-4 h-4 text-emerald-800" />
-              <span>{isExportingPdf ? 'Preparing PDF…' : 'Open / Save PDF'}</span>
+              {isExportingPdf ? (
+                <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              ) : (
+                <FileText className="w-3.5 h-3.5 text-blue-200" />
+              )}
+              <span>{isExportingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              title="Print document readiness assessment"
+            >
+              <Printer className="w-4 h-4 text-slate-700" />
+              <span>Print</span>
             </button>
           </div>
         </div>

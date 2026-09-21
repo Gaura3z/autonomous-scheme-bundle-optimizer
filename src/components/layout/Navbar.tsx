@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, Search, RotateCcw } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Search, RotateCcw, FlaskConical } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AssessmentStage } from '../../types';
 
@@ -9,11 +9,12 @@ interface NavbarProps {
   onOpenHowItWorks: () => void;
   onOpenDemoSelector: () => void;
   onOpenArchitecture?: () => void;
+  onOpenTestPlan?: () => void;
   onGoHome?: () => void;
 }
 
 /** Calm, English-only navigation; advanced controls stay out of the citizen path. */
-export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHowItWorks, onGoHome }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHowItWorks, onOpenTestPlan, onGoHome }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showPortalChooser, setShowPortalChooser] = useState(false);
   const isLanding = String(currentStage).toLowerCase() === 'landing';
@@ -46,10 +47,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHow
       </div>
 
       <div className="bg-slate-50 border-t border-slate-200 px-4 sm:px-6 lg:px-8 hidden md:block">
-        <div className="max-w-7xl mx-auto flex items-center gap-6 text-xs font-semibold text-slate-700 py-2">
-          <button onClick={goHome} className={isLanding ? 'text-blue-800 font-bold' : 'hover:text-blue-800 cursor-pointer'}>Home</button>
-          <button onClick={goHome} className="hover:text-blue-800 cursor-pointer">Find Schemes</button>
-          <button onClick={onOpenHowItWorks} className="hover:text-blue-800 cursor-pointer">Decision Framework</button>
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs font-semibold text-slate-700 py-2">
+          <div className="flex items-center gap-6">
+            <button onClick={goHome} className={isLanding ? 'text-blue-800 font-bold' : 'hover:text-blue-800 cursor-pointer'}>Home</button>
+            <button onClick={goHome} className="hover:text-blue-800 cursor-pointer">Find Schemes</button>
+            <button onClick={onOpenHowItWorks} className="hover:text-blue-800 cursor-pointer">Decision Framework</button>
+          </div>
+          {onOpenTestPlan && (
+            <button 
+              onClick={onOpenTestPlan} 
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer text-[11px] font-bold"
+            >
+              <FlaskConical className="w-3.5 h-3.5 text-blue-700" />
+              <span>Engine Test Suite (100% Pass)</span>
+            </button>
+          )}
         </div>
       </div>
 

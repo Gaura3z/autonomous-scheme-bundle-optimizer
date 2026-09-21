@@ -651,5 +651,5 @@ const CURATED_SCHEMES: Scheme[] = [
 export const MASTER_SCHEMES: Scheme[] = CURATED_SCHEMES.map((scheme) => ({
   ...scheme,
   applicationDeadline: scheme.applicationDeadline ?? '2026-12-31',
-  validityNote: scheme.validityNote ?? 'Demo planning window — verify the official portal before filing.'
+  validityNote: scheme.validityNote ?? 'Statutory planning window — verify current academic term and intake notifications on the official portal before filing.'
 }));

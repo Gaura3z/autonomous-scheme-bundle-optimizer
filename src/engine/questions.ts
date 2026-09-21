@@ -59,18 +59,36 @@ export function planAdaptiveQuestions(
     contextualFields.add('isPreparingForEngineeringOrMedicalEntrance');
   }
 
-  // Only ask Ph.D. question if citizen has reached Post-Graduate level or is older scholar (>= 22 yrs)
-  if (!isHighSchoolOrJuniorCollege && (profile.educationLevel === 'Postgraduate' || profile.age >= 23)) {
+  // DYNAMIC FILTERING: UPSC & Ph.D. Specific Question Filtering
+  // Students who have NOT selected 'Postgraduate' or 'Aspirant' status MUST NOT be asked UPSC or Ph.D. questions.
+  const isPostgraduate = profile.educationLevel === 'Postgraduate';
+  const isAspirant = Boolean(
+    profile.isAspirant === true ||
+    profile.academicFocus === 'Aspirant' ||
+    profile.employmentRole?.toLowerCase().includes('aspirant') ||
+    profile.occupation?.toLowerCase().includes('aspirant') ||
+    profile.isPreparingForUpscOrMpsc === true
+  );
+  const isDoctoral = Boolean(
+    profile.academicFocus === 'Doctoral' ||
+    profile.isEnrolledInPhd === true ||
+    (isPostgraduate && profile.age >= 23)
+  );
+
+  // Ph.D. questions strictly require Postgraduate or Doctoral research status
+  if (isDoctoral || isPostgraduate) {
     contextualFields.add('isEnrolledInPhd');
   }
 
-  // Only ask UPSC/MPSC questions if candidate has completed or is in senior graduation and is within civil services age (21 - 38)
-  if (!isHighSchoolOrJuniorCollege && profile.age >= 21 && profile.age <= 38 && (profile.isStudent || profile.employmentStatus === 'Unemployed')) {
+  // UPSC/MPSC questions strictly require Postgraduate or Aspirant status (Age 21-38)
+  if ((isPostgraduate || isAspirant) && profile.age >= 21 && profile.age <= 38) {
     contextualFields.add('isPreparingForUpscOrMpsc');
     contextualFields.add('hasClearedUpscOrMpscStage');
   }
   if (profile.gender === 'Female' && ['Self-Employed', 'Unemployed'].includes(profile.employmentStatus)) contextualFields.add('isWomanEntrepreneur');
-  if (profile.age >= 16 && profile.age <= 35 && !profile.isFarmer) contextualFields.add('pursuingApprenticeship');
+  if (profile.age >= 16 && profile.age <= 35 && !profile.isFarmer && (!profile.isStudent || profile.educationLevel === 'Diploma' || profile.educationLevel === 'Below 10th')) {
+    contextualFields.add('pursuingApprenticeship');
+  }
   if ((profile.gender === 'Female' || profile.maritalStatus === 'Married') && !profile.isStudent && !profile.isFarmer) contextualFields.add('hasGirlChildUnder10');
   if (profile.isFarmer) {
     contextualFields.add('landholdingHectares');
@@ -85,9 +103,32 @@ export function planAdaptiveQuestions(
   ]);
 
   const seenFields = new Set<string>();
-  return ADAPTIVE_QUESTIONS
+  const questions = ADAPTIVE_QUESTIONS
     .filter((question) => !answered.has(question.id))
-    .filter((question) => (ruleFields.has(String(question.field)) || contextualFields.has(String(question.field))) && !basicFields.has(String(question.field)))
+    .filter((question) => {
+      const fieldStr = String(question.field);
+      if (basicFields.has(fieldStr)) return false;
+
+      // Dynamic Exclusions: strictly exclude UPSC and PhD questions for students who haven't selected Postgraduate or Aspirant status
+      if (!isDoctoral && !isPostgraduate && fieldStr === 'isEnrolledInPhd') {
+        return false;
+      }
+      if (!isPostgraduate && !isAspirant && (fieldStr === 'isPreparingForUpscOrMpsc' || fieldStr === 'hasClearedUpscOrMpscStage')) {
+        return false;
+      }
+
+      // Must be relevant to the citizen's demographics, age, and academic stage
+      if (!contextualFields.has(fieldStr)) return false;
+      // And must either affect candidate schemes or be a key verification criterion
+      return ruleFields.has(fieldStr) || [
+        'isCapAdmitted',
+        'isProfessionalCourse',
+        'isHosteller',
+        'hasCasteValidity',
+        'hasNonCreamyLayer',
+        'isPreparingForEngineeringOrMedicalEntrance'
+      ].includes(fieldStr);
+    })
     .filter((question) => {
       const field = String(question.field);
       if (seenFields.has(field)) return false;
@@ -99,6 +140,7 @@ export function planAdaptiveQuestions(
       const leftImpact = schemeNamesByField.get(String(left.field))?.length ?? 0;
       return rightImpact - leftImpact || left.id.localeCompare(right.id);
     })
+    .slice(0, 6) // Focus on top 5-6 high-impact questions for rapid, accurate results
     .map((question) => {
       const schemes = schemeNamesByField.get(String(question.field)) ?? [];
       const reason = schemes.length > 0
@@ -106,4 +148,35 @@ export function planAdaptiveQuestions(
         : question.contextExplanation;
       return { ...question, contextExplanation: reason };
     });
+
+  return questions;
+}
+
+/**
+ * Returns dynamic refinement metrics for the active profile,
+ * letting the UI explicitly show which advanced questions were pruned.
+ */
+export function getQuestionRefinementStats(profile: CitizenProfile) {
+  const isPostgraduate = profile.educationLevel === 'Postgraduate';
+  const isAspirant = Boolean(
+    profile.isAspirant === true ||
+    profile.academicFocus === 'Aspirant' ||
+    profile.employmentRole?.toLowerCase().includes('aspirant') ||
+    profile.occupation?.toLowerCase().includes('aspirant') ||
+    profile.isPreparingForUpscOrMpsc === true
+  );
+  const isDoctoral = Boolean(
+    profile.academicFocus === 'Doctoral' ||
+    profile.isEnrolledInPhd === true ||
+    (isPostgraduate && profile.age >= 23)
+  );
+
+  return {
+    phdFilteredOut: !isDoctoral && !isPostgraduate,
+    upscFilteredOut: !isPostgraduate && !isAspirant,
+    isPostgraduate,
+    isAspirant,
+    isDoctoral,
+    activeFocus: profile.academicFocus || (isAspirant ? 'Aspirant' : isDoctoral ? 'Doctoral' : 'Degree/College')
+  };
 }

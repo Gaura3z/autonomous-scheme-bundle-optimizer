@@ -69,6 +69,8 @@ export interface CitizenProfile {
   hasGirlChildUnder10: boolean;
 
   // Student & Academic Specific Fields (Especially Maharashtra & Central Schemes)
+  isAspirant?: boolean;
+  academicFocus?: 'Degree/College' | 'Aspirant' | 'Doctoral' | 'Vocational';
   isProfessionalCourse?: boolean;
   isHosteller?: boolean;
   isCapAdmitted?: boolean;
@@ -277,7 +279,9 @@ export interface AdaptiveQuestion {
   id: string;
   field: keyof CitizenProfile;
   title: string;
+  titleMr?: string;
   contextExplanation: string;
+  contextExplanationMr?: string;
   schemeJustification: string;
   type: 'select' | 'boolean' | 'number' | 'radio';
   options?: { label: string; value: unknown; description?: string }[];

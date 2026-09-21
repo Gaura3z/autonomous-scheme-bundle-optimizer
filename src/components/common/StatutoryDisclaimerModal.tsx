@@ -12,12 +12,20 @@ export const StatutoryDisclaimerModal: React.FC<StatutoryDisclaimerModalProps> =
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasAcknowledged, setHasAcknowledged] = useState(() => {
-    return localStorage.getItem('schemewise_terms_acknowledged') === 'true';
+    try {
+      return localStorage.getItem('schemewise_terms_acknowledged') === 'true';
+    } catch {
+      return false;
+    }
   });
   const [expandedSection, setExpandedSection] = useState<number | null>(0);
 
   const handleAcknowledge = () => {
-    localStorage.setItem('schemewise_terms_acknowledged', 'true');
+    try {
+      localStorage.setItem('schemewise_terms_acknowledged', 'true');
+    } catch {
+      // ignore
+    }
     setHasAcknowledged(true);
     setIsOpen(false);
   };
