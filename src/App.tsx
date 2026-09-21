@@ -40,6 +40,8 @@ import { DocumentDependencies } from './components/stages/DocumentDependencies';
 import { ApplicationRoadmap } from './components/stages/ApplicationRoadmap';
 import { RecommendationSummary } from './components/stages/RecommendationSummary';
 import { AdminPortal } from './components/admin/AdminPortal';
+import { IssueResolverModal } from './components/common/IssueResolverModal';
+import { HelpCircle } from 'lucide-react';
 
 const DEFAULT_PROFILE: CitizenProfile = {
   age: 22,
@@ -84,16 +86,30 @@ export default function App() {
   const [isDemoSelectorOpen, setIsDemoSelectorOpen] = useState(false);
   const [isArchitectureOpen, setIsArchitectureOpen] = useState(false);
   const [isTestPlanOpen, setIsTestPlanOpen] = useState(false);
+  const [isIssueResolverOpen, setIsIssueResolverOpen] = useState(false);
+  const [issueResolverCategory, setIssueResolverCategory] = useState<string>('all');
 
-  // Global listener to trigger architecture and test plan modals from anywhere
+  const handleOpenIssueResolver = (category?: string) => {
+    setIssueResolverCategory(category || 'all');
+    setIsIssueResolverOpen(true);
+  };
+
+  // Global listener to trigger architecture, test plan, and issue resolver modals from anywhere
   useEffect(() => {
     const archHandler = () => setIsArchitectureOpen(true);
     const testPlanHandler = () => setIsTestPlanOpen(true);
+    const issueResolverHandler = (e: Event) => {
+      const customEvent = e as CustomEvent<{ category?: string }>;
+      handleOpenIssueResolver(customEvent.detail?.category);
+    };
+
     window.addEventListener('open-architecture-modal', archHandler);
     window.addEventListener('open-test-plan-modal', testPlanHandler);
+    window.addEventListener('open-issue-resolver', issueResolverHandler);
     return () => {
       window.removeEventListener('open-architecture-modal', archHandler);
       window.removeEventListener('open-test-plan-modal', testPlanHandler);
+      window.removeEventListener('open-issue-resolver', issueResolverHandler);
     };
   }, []);
 
@@ -263,6 +279,7 @@ export default function App() {
         onOpenTestPlan={() => setIsTestPlanOpen(true)}
         onReset={handleReset}
         onGoHome={() => setStage('LANDING')}
+        onOpenIssueResolver={handleOpenIssueResolver}
       />
 
       {/* Demo Persona & Judge Evaluation Controller (Active in Demo Mode) */}
@@ -355,6 +372,7 @@ export default function App() {
                 onClearAll={handleClearAllDocuments}
                 onProceedToReadiness={() => setStage('PROCESSING')}
                 onBackToBundle={() => setStage('QUESTIONNAIRE')}
+                onOpenIssueResolver={handleOpenIssueResolver}
               />
             )}
 
@@ -444,6 +462,28 @@ export default function App() {
         onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
         onOpenDemoSelector={() => setIsDemoSelectorOpen(true)}
         onOpenArchitecture={() => setIsArchitectureOpen(true)}
+        onOpenIssueResolver={handleOpenIssueResolver}
+      />
+
+      {/* Floating Quick Action: Solve an Issue / Grievance Desk */}
+      <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 print:hidden">
+        <button
+          onClick={() => handleOpenIssueResolver('all')}
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold text-xs rounded-full shadow-lg shadow-amber-500/30 border border-amber-300 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+          aria-label="Solve an Issue / Citizen Grievance Desk"
+          title="Resolve document issues, name mismatches, bank DBT problems, or portal rejections"
+        >
+          <HelpCircle className="w-4 h-4 text-slate-950 group-hover:rotate-12 transition-transform" />
+          <span className="tracking-tight">Solve an Issue</span>
+        </button>
+      </div>
+
+      {/* Citizen Grievance & Issue Solver Modal */}
+      <IssueResolverModal
+        isOpen={isIssueResolverOpen}
+        onClose={() => setIsIssueResolverOpen(false)}
+        initialCategory={issueResolverCategory}
+        onResetSession={handleReset}
       />
     </div>
   );

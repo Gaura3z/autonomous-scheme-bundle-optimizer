@@ -19,12 +19,14 @@ interface FooterProps {
   onOpenHowItWorks: () => void;
   onOpenDemoSelector: () => void;
   onOpenArchitecture?: () => void;
+  onOpenIssueResolver?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenHowItWorks,
   onOpenDemoSelector,
-  onOpenArchitecture
+  onOpenArchitecture,
+  onOpenIssueResolver
 }) => {
   return (
     <footer className="bg-slate-900 text-slate-300 text-xs border-t border-slate-800 print:hidden">
@@ -191,6 +193,16 @@ export const Footer: React.FC<FooterProps> = ({
                 <Mail className="w-4 h-4 text-blue-400 shrink-0" />
                 <span>SchemeWise support desk</span>
               </div>
+              {onOpenIssueResolver && (
+                <button
+                  type="button"
+                  onClick={onOpenIssueResolver}
+                  className="w-full mt-2 py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <HelpCircle className="w-4 h-4 text-amber-400" />
+                  <span>Solve an Issue / Grievance Desk</span>
+                </button>
+              )}
               <div className="mt-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-[11px] text-slate-300">
                 <span className="font-semibold text-white block mb-0.5">National Grievance Portal</span>
                 Citizens can register scheme-related grievances directly on CPGRAMS (pgportal.gov.in).

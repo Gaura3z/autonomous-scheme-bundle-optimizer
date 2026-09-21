@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, Search, RotateCcw, FlaskConical } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Search, RotateCcw, FlaskConical, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AssessmentStage } from '../../types';
 
@@ -11,10 +11,11 @@ interface NavbarProps {
   onOpenArchitecture?: () => void;
   onOpenTestPlan?: () => void;
   onGoHome?: () => void;
+  onOpenIssueResolver?: () => void;
 }
 
 /** Calm, English-only navigation; advanced controls stay out of the citizen path. */
-export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHowItWorks, onOpenTestPlan, onGoHome }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHowItWorks, onOpenTestPlan, onGoHome, onOpenIssueResolver }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showPortalChooser, setShowPortalChooser] = useState(false);
   const isLanding = String(currentStage).toLowerCase() === 'landing';
@@ -37,7 +38,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHow
           </form>
 
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowPortalChooser(true)} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer">
+            {onOpenIssueResolver && (
+              <button 
+                onClick={onOpenIssueResolver} 
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors cursor-pointer shadow-2xs"
+                title="Fix document errors, name mismatches, bank DBT issues, or portal rejections"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
+                <span className="hidden xs:inline">Solve an Issue</span>
+                <span className="xs:hidden">Help</span>
+              </button>
+            )}
+            <button onClick={() => setShowPortalChooser(true)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer">
               Sign In <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <button onClick={onOpenHowItWorks} className="hidden sm:inline-flex px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">How it works</button>
@@ -52,6 +64,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStage, onReset, onOpenHow
             <button onClick={goHome} className={isLanding ? 'text-blue-800 font-bold' : 'hover:text-blue-800 cursor-pointer'}>Home</button>
             <button onClick={goHome} className="hover:text-blue-800 cursor-pointer">Find Schemes</button>
             <button onClick={onOpenHowItWorks} className="hover:text-blue-800 cursor-pointer">Decision Framework</button>
+            {onOpenIssueResolver && (
+              <button onClick={onOpenIssueResolver} className="text-amber-900 hover:text-amber-800 cursor-pointer flex items-center gap-1 font-bold">
+                <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
+                <span>Issue & Grievance Solver</span>
+              </button>
+            )}
           </div>
           {onOpenTestPlan && (
             <button 

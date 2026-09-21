@@ -13,7 +13,8 @@ import {
   Info, 
   FileText,
   Building2,
-  Clock
+  Clock,
+  HelpCircle
 } from 'lucide-react';
 import { DocumentInfo, Scheme } from '../../types';
 import { planDocumentRequests } from '../../engine/documents';
@@ -28,6 +29,7 @@ interface DocumentChecklistProps {
   onClearAll: () => void;
   onProceedToReadiness: () => void;
   onBackToBundle: () => void;
+  onOpenIssueResolver?: (category?: string) => void;
 }
 
 export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
@@ -37,7 +39,8 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
   onSelectAll,
   onClearAll,
   onProceedToReadiness,
-  onBackToBundle
+  onBackToBundle,
+  onOpenIssueResolver
 }) => {
   const documentRequests = planDocumentRequests(bundleSchemes, declaredDocumentIds);
   const requiredDocIds = documentRequests.map((request) => request.document.id);
@@ -86,6 +89,33 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
             <strong>Zero-Upload Privacy Model:</strong> We only use this self-declared checklist to calculate your immediate readiness gap. You do <em>not</em> need to upload files, enter Aadhaar OTPs, or transmit private records.
           </div>
         </div>
+
+        {/* Issue Resolution Helper Banner */}
+        {onOpenIssueResolver && (
+          <div className="mt-3.5 p-4 bg-amber-50/90 border border-amber-300/90 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                <HelpCircle className="w-4 h-4 text-amber-700" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-amber-950">
+                  Facing an issue with any certificate or document?
+                </h3>
+                <p className="text-[11px] sm:text-xs text-amber-900/90 leading-relaxed">
+                  Name mismatch on Aadhaar, pending caste validity, expired income certificate, or bank DBT not linked? You can solve it here directly.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenIssueResolver('document')}
+              className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <span>Solve Issue Here</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Select All / Clear Quick Bar */}

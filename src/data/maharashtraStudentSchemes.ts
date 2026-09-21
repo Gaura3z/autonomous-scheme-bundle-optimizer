@@ -1567,7 +1567,7 @@ export const MAHARASHTRA_STUDENT_SCHEMES: Scheme[] = [
       displayAmount: '₹1,50,000 / year throughout degree',
       frequency: 'Annual'
     },
-    requiredDocumentIds: ['aadhaar', 'gender' as any, 'educational_marksheet', 'student_id_bonafide', 'income_certificate', 'cap_allotment_letter', 'bank_passbook'],
+    requiredDocumentIds: ['aadhaar', 'educational_marksheet', 'student_id_bonafide', 'income_certificate', 'cap_allotment_letter', 'bank_passbook'],
     rules: all(
       rule('gender', 'eq', 'Eligible exclusively for female students', 'Female'),
       rule('isStudent', 'eq', 'Applicant must be an active student', true),
