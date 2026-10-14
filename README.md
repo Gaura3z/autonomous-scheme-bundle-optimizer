@@ -1,7 +1,6 @@
-# 🏛️ PS16: Autonomous Decision-Support & Conflict-Free Welfare Scheme Bundle Optimizer for Citizens
+# SchemeWise — Autonomous Scheme-Bundle Optimizer
 
-> **Kurukshetra 2.0 Hackfest 2026** | **Problem Statement Code: PS16**  
-> **Team ID / Name**: `KH001-TeamName`
+> Kurukshetra 2.0 Hackfest 2026 · Problem Statement PS16
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Built with React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev)
@@ -11,14 +10,56 @@
 
 ---
 
+## Live demo
+
+**[Open SchemeWise](https://schemewise-nu.vercel.app/)** — existing Vercel deployment, checked October 14, 2026. This deployment is an older build and may not match the screenshots or current repository.
+
+SchemeWise is a citizen-facing prototype for exploring government scheme discovery, profile-based matching, eligibility checks, conflict-aware bundles, document readiness, and an application roadmap. It uses a curated sample catalog and demonstration personas. In the current repository, the in-app catalog contains 110 scheme records (78 Central and 32 State/UT); the landing page's `4,770+` discovery figure is not a count of records evaluated by this prototype. Demo results are illustrative, not official eligibility decisions. Verify current rules, amounts, and deadlines with the linked government portals.
+
+## Screenshots
+
+Desktop captures of the live app at 1440 × 1200. Demonstration-profile screens are labeled in the app as prototype data. Numbered markers point to details described in each caption; open **original capture** for the unmarked image.
+
+<p align="center">
+  <img src="docs/screenshots/01-home.png" alt="SchemeWise landing page with the scheme discovery entry point and sample scheme cards" width="100%" />
+  <br /><em>Home — the public landing page and entry point to the assessment.</em>
+  · <a href="docs/screenshots/01-home-original.png">Original capture</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/02-demo-personas.png" alt="Demonstration persona selector showing three prototype profiles and their scenario focus" width="100%" />
+  <br /><em>Demo personas — marker 1 highlights the prototype-data label; each card previews its scenario.</em>
+  · <a href="docs/screenshots/02-demo-personas-original.png">Original capture</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/03-eligibility-results.png" alt="Scheme assessment results showing evaluated, eligible, and ineligible sample schemes" width="100%" />
+  <br /><em>Eligibility results — markers 1 and 2 highlight the result counts and modeled conflicts for the selected demo profile.</em>
+  · <a href="docs/screenshots/03-eligibility-results-original.png">Original capture</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/04-optimized-bundle.png" alt="Optimized scheme bundle with prototype value estimate and conflicts avoided" width="100%" />
+  <br /><em>Optimized bundle — marker 1 identifies the optimization status; marker 2 points to additional potential benefits gated by missing documents. Values shown come from a demonstration profile.</em>
+  · <a href="docs/screenshots/04-optimized-bundle-original.png">Original capture</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/05-application-roadmap.png" alt="Sequenced application roadmap with prerequisite and certificate tasks" width="100%" />
+  <br /><em>Application roadmap — marker 1 shows progress tracking; marker 2 points to the first prerequisite task in the sequence.</em>
+  · <a href="docs/screenshots/05-application-roadmap-original.png">Original capture</a>
+</p>
+
+---
+
 ## 📌 1. Executive Summary & Problem Context
 
-Citizens navigating welfare schemes in India (across 4,770+ Central and State programs) face three critical systemic bottlenecks:
-1. **Discovery Fragmentation**: Information is siloed across hundreds of ministry portals and state departments with ambiguous eligibility criteria.
-2. **Statutory Clawbacks & Mutually Exclusive Conflicts**: Applying for two conflicting schemes (e.g. state farm input subsidy + central pension or overlapping higher education scholarships) often results in application rejection, clawback penalties, or permanent disqualification.
-3. **Application Friction**: Lack of sequenced prerequisite roadmaps and document inventories leads to abandoned registrations and missed deadlines.
+Citizens navigating welfare schemes in India face three common challenges:
+1. **Discovery Fragmentation**: Scheme information is distributed across ministry and state portals.
+2. **Overlapping Rules**: Some programs have exclusions or duplicate-benefit restrictions that applicants need to check.
+3. **Application Friction**: Applicants may need to identify prerequisite documents and the correct order for obtaining them.
 
-**Our Solution**: **SchemeWise** is an **Autonomous Decision-Support and Conflict-Free Scheme-Bundle Optimizer** inspired by official **myScheme (MeitY/NeGD)** citizen-service design standards. It evaluates citizen profiles deterministically, eliminates statutory conflicts using an exclusion matrix, maximizes total monetary and social utility, and produces an actionable, sequenced document roadmap without requiring Aadhaar or sensitive uploads.
+**SchemeWise** is a decision-support prototype inspired by myScheme and Digital India citizen-service patterns. Its guided flow evaluates a profile against a curated sample catalog, surfaces modeled eligibility and conflict rules, builds a compatible bundle, and sequences document prerequisites. Demo flows use fixed prototype profiles and a self-declared document checklist; they do not require uploading documents. Confirm real application requirements and current policy details with the linked official portals.
 
 ---
 
@@ -26,52 +67,31 @@ Citizens navigating welfare schemes in India (across 4,770+ Central and State pr
 
 | Feature | Description |
 | :--- | :--- |
-| **SchemeWise Citizen Experience** | SchemeWise implementation inspired by official myScheme & Digital India standards: civic emblem, search bar, language switcher, pastel stat cards, and 3-way categories/states/ministries tabs. |
-| **Autonomous Deterministic Engine** | Rule-evaluation pipeline matching demographic, regional, and livelihood attributes against gazette conditions without hallucination. |
-| **Conflict & Exclusion Matrix** | Detects mutually exclusive programs (e.g., dual scholarship exclusions, institutional farmer income restrictions) and resolves them to maximize net citizen benefit. |
-| **Document Prerequisite Sequencer** | Identifies the minimal common set of documents needed (Aadhaar, Land Record 7/12, Income Certificate, etc.) and generates a phased timeline. |
-| **Interactive SchemeBot AI** | Embedded bottom-right assistant mascot for natural language citizen queries and instant sector navigation. |
-| **Zero Document Uploads Required** | Pure client-side privacy-first evaluation — citizens don't risk sharing sensitive identities for initial discovery. |
-| **Demo Citizen Personas** | 1-click evaluation profiles for judges: Small Marginal Farmer, College SC/ST Student, Urban Street Vendor, and Rural Homemaker. |
+| **Citizen experience** | React interface for scheme discovery, category browsing, profile intake, and guided assessment. |
+| **Deterministic matching** | Rules evaluate demographic, regional, livelihood, and document inputs against the checked-in prototype catalog. |
+| **Conflict-aware bundle** | The app identifies modeled mutual-exclusion pairs and presents a compatible, value-ranked bundle. |
+| **Document readiness and roadmap** | Self-declared document checklist, prerequisite links, and sequenced application actions. |
+| **Demonstration personas** | Three labeled sample profiles exercise student, woman entrepreneur, and farmer scenarios. |
+| **Optional explanations** | The Express API can use the Google GenAI SDK when `GEMINI_API_KEY` is configured; deterministic results do not depend on it. |
 
 ---
 
 ## 📂 3. Repository Structure
 
-This repository strictly adheres to the Kurukshetra 2.0 evaluation structure:
-
 ```
-KH001-TeamName/
-├── README.md                  # Comprehensive Project Overview & Evaluation Guide
-├── LICENSE                    # MIT Open Source License
-├── package.json               # Dependencies & Build Configuration
-├── .gitignore                 # Standard Node/React Ignore Rules
-│
-├── src/                       # Complete Application Source Code
-│   ├── components/            # Modular React UI Components
-│   │   ├── layout/            # Navbar, Header, Accessibility Bar, SubNav
-│   │   ├── stages/            # LandingPage, AssessmentWizard, SchemeCatalog, Roadmap
-│   │   └── ui/                # SchemeBot, MetricCards, Modals, Personas
-│   ├── engine/                # Core Rule Matcher & Conflict Elimination Engine
-│   ├── data/                  # Verified Scheme Gazette Definitions & Exclusion Rules
-│   ├── types/                 # Shared TypeScript Types & Interfaces
-│   ├── App.tsx                # Main Applet Controller & Stage Router
-│   ├── main.tsx               # Application Entry Point
-│   └── index.css              # Global Tailwind CSS Styles
-│
-├── docs/                      # Technical Documentation & Diagrams
-│   ├── project-documentation.md # Algorithmic Details & Architecture Specification
-│   ├── architecture.svg       # Visual System Architecture Diagram
-│   └── other-diagrams/        # Sequence & Decision Flow Diagrams
-│
-├── screenshots/               # High-Resolution Application Screenshots
-│   ├── README.md              # Screenshot descriptions
-│   ├── screenshot-1.png       # SchemeWise Hero & Smartphone Mockup
-│   └── screenshot-2.png       # 3-Stat Metric Cards & Category Grid
-│
-└── data/                      # Dataset Specifications & Schemas
-    ├── README.md              # Data dictionary & statutory schema docs
-    └── sample_schemes.json    # Verified sample scheme definitions
+.
+├── server.ts                  # Express dev/API server and optional Gemini explanations
+├── package.json               # Frontend/server scripts and dependencies
+├── bun.lock                   # Bun dependency lockfile
+├── src/
+│   ├── App.tsx                # Assessment stages and app state
+│   ├── components/            # Citizen, admin, and shared UI
+│   ├── data/                  # Curated prototype schemes and demo profiles
+│   ├── engine/                # Eligibility, conflict, bundle, and roadmap logic
+│   ├── services/              # API and document export helpers
+│   └── types/                 # Shared TypeScript models
+├── docs/                      # Architecture, project notes, and screenshots
+└── data/                      # Data schema notes and sample records
 ```
 
 ---
@@ -81,8 +101,11 @@ KH001-TeamName/
 - **Frontend Core**: React 19, TypeScript 5.8
 - **Build & Dev Tooling**: Vite 6.2, Node.js
 - **Styling & Design System**: Tailwind CSS v4, Lucide React icons
-- **Physics & Animations**: `motion` (Framer Motion v12)
-- **Local Persistence & Privacy**: Client-side secure state (zero sensitive data exfiltration)
+- **Animation**: Motion 12
+- **API**: Express 4; Google GenAI SDK for optional explanations when a server key is configured
+- **Assessment persistence**: Local browser storage for an in-progress draft
+
+The Vercel link above serves the frontend. The repository also includes an Express server for local/API use; the current Vercel configuration does not deploy that server as API functions. Without the optional Gemini key, the app uses its deterministic explanations.
 
 ---
 
@@ -90,19 +113,19 @@ KH001-TeamName/
 
 ### Prerequisites
 - Node.js `v18.0.0` or higher
-- npm `v9.0.0` or higher (or pnpm / yarn / bun)
+- Bun (the repository includes `bun.lock`)
 
 ### Installation
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YourUsername/KH001-TeamName.git
-cd KH001-TeamName
+git clone https://github.com/Gaura3z/autonomous-scheme-bundle-optimizer.git
+cd autonomous-scheme-bundle-optimizer
 
-# 2. Install dependencies
-npm install
+# 2. Install the locked dependencies
+bun install --frozen-lockfile
 
 # 3. Start the development server (Binds to 0.0.0.0:3000)
-npm run dev
+bun run dev
 
 # 4. Open in browser
 http://localhost:3000
@@ -110,22 +133,15 @@ http://localhost:3000
 
 ### Production Build
 ```bash
-npm run build
-npm run preview
+bun run build
+bun run preview
 ```
 
 ---
 
 ## 🧪 6. Testing with Demo Personas (For Judges)
 
-To test the bundle optimizer instantly without typing manual details:
-1. Open the homepage at `http://localhost:3000`.
-2. Click the **"Demo Citizen Personas"** button in the header or hero banner.
-3. Select any of the pre-loaded profiles:
-   - **Ramesh Patel (Small Marginal Farmer, Gujarat)**: Evaluates PM-KISAN, PM Surya Ghar, Soil Health Card, and Kisan Credit Card.
-   - **Pooja Kumari (B.Tech College Student, Bihar)**: Evaluates Central Sector Post-Matric Scholarship and Skill India AICTE benefits while eliminating conflicting dual state stipends.
-   - **Mohd. Rafiq (Urban Street Vendor, Uttar Pradesh)**: Tests PM SVANidhi working capital tranche progression and Mudra loan bundling.
-4. Watch the engine automatically prune conflicting schemes and construct an optimized, high-yield application bundle!
+The landing page's phone preview includes a **Profile** entry point to the demonstration persona selector. Select **Aarav Sharma**, **Sunita Devi**, or **Ramesh Patel** to load a labeled prototype profile and follow its assessment. These fixed sample scenarios are for demonstrating the interface and engine paths; outputs are not individualized government determinations.
 
 ---
 
