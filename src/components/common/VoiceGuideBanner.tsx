@@ -50,9 +50,12 @@ export const VoiceGuideBanner: React.FC<VoiceGuideBannerProps> = ({
     setIsPlaying(false);
   }, [stepNumber]);
 
+  const [speechNotice, setSpeechNotice] = useState<string | null>(null);
+
   const handleToggleVoice = () => {
     if (!('speechSynthesis' in window)) {
-      alert('Voice narration is not supported on this browser.');
+      setSpeechNotice('Voice narration is not supported in this browser.');
+      setTimeout(() => setSpeechNotice(null), 4000);
       return;
     }
 
@@ -155,6 +158,12 @@ export const VoiceGuideBanner: React.FC<VoiceGuideBannerProps> = ({
             </motion.button>
           </div>
         </div>
+
+        {speechNotice && (
+          <div className="mt-2 text-xs text-amber-300 bg-amber-950/50 border border-amber-500/30 rounded-lg px-2.5 py-1">
+            {speechNotice}
+          </div>
+        )}
 
         {/* Scroll hint on mobile */}
         {showScrollHint && !hasScrolled && (
